@@ -74,7 +74,7 @@ export default {
       },
       fontFamily: {
         display: ['Antropos', 'Amatic SC', 'Caveat', 'cursive'],
-        hand: ['Amatic SC', 'Patrick Hand', 'cursive'],
+        hand: ['Nunito', 'system-ui', 'sans-serif'],
         body: ['Nunito', 'system-ui', 'sans-serif'],
         antropos: ['Antropos', 'sans-serif'],
       },

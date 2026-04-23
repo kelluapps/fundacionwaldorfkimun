@@ -57,6 +57,32 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        "background-deep": "hsl(var(--background-deep))",
+        "primary-soft": "hsl(var(--primary-soft))",
+        "secondary-soft": "hsl(var(--secondary-soft))",
+        band: {
+          DEFAULT: "hsl(var(--band))",
+          foreground: "hsl(var(--band-foreground))",
+        },
+        tier: {
+          seed: "hsl(var(--tier-seed))",
+          sprout: "hsl(var(--tier-sprout))",
+          branch: "hsl(var(--tier-branch))",
+          leaf: "hsl(var(--tier-leaf))",
+          fruit: "hsl(var(--tier-fruit))",
+        },
+      },
+      fontFamily: {
+        display: ['Caveat', 'cursive'],
+        hand: ['Patrick Hand', 'cursive'],
+        body: ['Cormorant Garamond', 'Georgia', 'serif'],
+      },
+      boxShadow: {
+        soft: 'var(--shadow-soft)',
+        card: 'var(--shadow-card)',
+      },
+      backgroundImage: {
+        warm: 'var(--gradient-warm)',
       },
       borderRadius: {
         lg: "var(--radius)",

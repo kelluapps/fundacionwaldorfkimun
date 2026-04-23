@@ -117,8 +117,8 @@
     line-height: 1.25;
   }
   .font-hand {
-    font-family: 'Amatic SC', 'Patrick Hand', cursive;
-    font-weight: 700;
+    font-family: 'Nunito', system-ui, sans-serif !important;
+    font-weight: 600;
     letter-spacing: 0.12em;
   }
   .font-body {

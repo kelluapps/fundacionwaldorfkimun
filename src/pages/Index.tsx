@@ -183,15 +183,12 @@ const Index = () => {
           </a>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => handleSelect()}
+            <a
+              href="/"
               className="bg-accent text-accent-foreground rounded-2xl px-4 lg:px-6 py-2.5 font-hand text-[11px] lg:text-xs tracking-[0.2em] leading-tight shadow-card hover:bg-accent/90 transition-all hover:-translate-y-0.5"
             >
               QUIERO<br className="lg:hidden" /> <span className="lg:inline">SER PARTE</span>
-            </button>
-            <button aria-label="Menú" className="hidden lg:block p-2 text-foreground/70">
-              <Menu className="w-6 h-6" strokeWidth={1.5} />
-            </button>
+            </a>
           </div>
         </div>
       </header>

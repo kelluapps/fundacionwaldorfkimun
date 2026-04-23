@@ -127,9 +127,9 @@ const Campanas = () => {
       <section className="px-5 lg:px-12 pb-10">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-[1.6fr_1fr] gap-6">
           {/* Hero */}
-          <div className="bg-card rounded-3xl shadow-card border border-border/50 overflow-hidden grid sm:grid-cols-2 gap-0">
-            <div className="p-6 lg:p-10 flex flex-col justify-center">
-              <h1 className="font-display text-secondary text-3xl sm:text-4xl lg:text-5xl uppercase leading-[1.1] tracking-wide">
+          <div className="bg-card rounded-3xl shadow-card border border-border/50 overflow-hidden grid sm:grid-cols-[1.15fr_1fr] gap-0">
+            <div className="p-6 lg:p-10 flex flex-col justify-center min-w-0">
+              <h1 className="font-display text-secondary text-3xl sm:text-[2.25rem] lg:text-[2.75rem] xl:text-5xl uppercase leading-[1.1] tracking-wide break-words">
                 Construyamos juntos el anfiteatro de Kimün
               </h1>
               <Leaflet className="w-12 h-5 text-secondary mt-4" />
@@ -202,7 +202,7 @@ const Campanas = () => {
       <section id="seats" className="px-5 lg:px-12 pb-12">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-[1.6fr_1fr] gap-6">
           {/* Amphitheater */}
-          <div className="bg-card rounded-3xl shadow-card border border-border/50 p-6 lg:p-10">
+          <div className="bg-card rounded-3xl shadow-card border border-border/50 p-4 sm:p-6 lg:p-10 min-w-0 overflow-hidden">
             <div className="flex items-center justify-center gap-3 mb-3">
               <Leaflet className="w-10 h-4 text-secondary -scale-x-100" />
               <h2 className="font-display text-secondary text-2xl lg:text-3xl uppercase tracking-wide text-center">
@@ -215,19 +215,22 @@ const Campanas = () => {
               Haz clic en los asientos que quieres donar
             </p>
 
-            {/* Rows */}
-            <div className="flex flex-col gap-2 lg:gap-2.5 items-stretch">
+            {/* Rows — fluid scaling, fits any width without horizontal scroll */}
+            <div className="flex flex-col gap-1.5 sm:gap-2 lg:gap-2.5 items-stretch w-full">
               {rowsRendered.map((row) => (
-                <div key={row.id} className="flex items-center gap-3">
-                  <span className="font-hand text-[10px] lg:text-xs tracking-widest text-foreground/60 w-10 lg:w-12 shrink-0">
+                <div key={row.id} className="flex items-center gap-2 sm:gap-3 w-full min-w-0">
+                  <span className="font-hand text-[9px] sm:text-[10px] lg:text-xs tracking-widest text-foreground/60 w-8 sm:w-10 lg:w-12 shrink-0">
                     FILA {row.id}
                   </span>
-                  <div className="flex-1 flex justify-center gap-1.5 lg:gap-2">
+                  <div
+                    className="flex-1 min-w-0 grid justify-center gap-[2px] sm:gap-1.5 lg:gap-2"
+                    style={{ gridTemplateColumns: `repeat(${row.seats}, minmax(0, 1fr))` }}
+                  >
                     {row.items.map((id) => {
                       const isDonated = PRE_DONATED.has(id);
                       const isSelected = selected.has(id);
                       const base =
-                        "w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 rounded-full transition-all duration-200";
+                        "aspect-square w-full max-w-[24px] mx-auto rounded-full transition-all duration-200";
                       const cls = isDonated
                         ? "bg-muted-foreground/40 cursor-not-allowed"
                         : isSelected

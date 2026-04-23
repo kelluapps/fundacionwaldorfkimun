@@ -203,7 +203,7 @@ const Index = () => {
       <section id="sueno" className="px-5 lg:px-12 pt-4 lg:pt-6 pb-12">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-6 items-center">
           <div className="order-2 lg:order-1 lg:pr-6">
-            <h1 className="font-display text-primary text-6xl sm:text-7xl lg:text-8xl leading-[0.9] tracking-wide uppercase">
+            <h1 className="font-display text-primary text-5xl sm:text-6xl lg:text-7xl leading-[1.15] tracking-wide uppercase">
               Cultivemos juntos un sueño que transforma vidas
             </h1>
             <p className="mt-6 lg:mt-8 text-foreground/80 text-base lg:text-lg leading-relaxed max-w-md">

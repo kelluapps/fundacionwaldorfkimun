@@ -201,7 +201,7 @@ const Index = () => {
               Cultivemos juntos un sueño que transforma vidas
             </h1>
             <p className="mt-6 lg:mt-8 text-foreground/80 text-base lg:text-lg leading-relaxed max-w-md">
-              En <span className="font-semibold text-foreground">Algarrobo</span>, estamos creando un bosque,
+              En <span className="font-semibold text-foreground">Algarrobo, Chile</span> estamos creando un bioparque,
               una escuela de artes y oficios, un espacio vivo para que la comunidad florezca desde la educación Waldorf.
             </p>
             <button
@@ -325,8 +325,8 @@ const Index = () => {
       <section className="px-5 lg:px-12 pb-16">
         <div className="max-w-6xl mx-auto bg-card rounded-3xl shadow-card border border-border/50 p-6 lg:p-10 grid lg:grid-cols-2 gap-8 items-center">
           <div>
-            <h3 className="font-display text-secondary text-2xl lg:text-4xl uppercase leading-tight">
-              Este no es solo un colegio,<br />es un movimiento que cultiva el futuro.
+            <h3 className="font-display text-secondary text-2xl lg:text-4xl uppercase leading-tight whitespace-pre-line">
+              ESTE NO ES SOLO UNA ESCUELA,{"\n"}ES UN MOVIMIENTO QUE CULTIVA EL FUTURO.
             </h3>
             <p className="mt-5 text-foreground/80 leading-relaxed text-base lg:text-lg">
               Kimün es un espacio donde niños, niñas y jóvenes crecen con sentido,

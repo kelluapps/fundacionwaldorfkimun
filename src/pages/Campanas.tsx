@@ -104,19 +104,15 @@ const Campanas = () => {
             <img src={logo} alt="Waldorf Kimún" className="h-20 lg:h-24 w-auto" />
           </Link>
           <nav className="hidden lg:flex items-center gap-7 font-hand text-[13px] tracking-[0.18em] text-foreground/80">
-            <Link to="/" className="hover:text-primary transition-colors">INICIO</Link>
-            <Link to="/" className="hover:text-primary transition-colors">SOBRE KIMÜN</Link>
-            <Link to="/" className="hover:text-primary transition-colors">PROYECTOS</Link>
+            <Link to="/" className="hover:text-primary transition-colors">EL SUEÑO</Link>
             <span className="text-primary border-b-2 border-primary pb-1">CAMPAÑAS</span>
-            <Link to="/" className="hover:text-primary transition-colors">TRANSPARENCIA</Link>
-            <Link to="/" className="hover:text-primary transition-colors">CONTACTO</Link>
           </nav>
-          <button
-            onClick={handleContinue}
+          <a
+            href="/"
             className="bg-primary text-primary-foreground rounded-full px-5 lg:px-7 py-2.5 lg:py-3 font-hand text-[11px] lg:text-xs tracking-[0.2em] shadow-card hover:bg-primary/90 transition-all hover:-translate-y-0.5"
           >
             QUIERO SER PARTE
-          </button>
+          </a>
         </div>
         <Link to="/" className="lg:hidden inline-flex items-center gap-1 text-secondary font-hand text-[11px] tracking-widest mt-2">
           <ArrowLeft className="w-3.5 h-3.5" /> VOLVER

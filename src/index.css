@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Antropos — fuente antroposófica oficial Waldorf */
+@font-face {
+  font-family: 'Antropos';
+  src: url('/fonts/Antropos.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Waldorf Kimún — design system. All colors HSL. */
 
 @layer base {
@@ -96,14 +105,16 @@
       radial-gradient(ellipse at bottom, hsl(78 25% 90% / 0.4), transparent 60%);
   }
   h1, h2, h3, h4 {
-    font-family: 'Amatic SC', 'Caveat', cursive;
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    font-family: 'Antropos', 'Amatic SC', 'Caveat', cursive;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    line-height: 1.25;
   }
   .font-display {
-    font-family: 'Amatic SC', cursive;
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    font-family: 'Antropos', 'Amatic SC', cursive;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    line-height: 1.25;
   }
   .font-hand {
     font-family: 'Amatic SC', 'Patrick Hand', cursive;

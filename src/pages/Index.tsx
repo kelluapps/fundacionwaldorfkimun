@@ -94,12 +94,8 @@ const tiers: Tier[] = [
 ];
 
 const navItems = [
-  { label: "EL SUEÑO", href: "#sueno" },
-  { label: "EL ÁRBOL", href: "#arbol" },
-  { label: "CLUB DE AMIGOS", href: "#club" },
+  { label: "EL SUEÑO", href: "/" },
   { label: "CAMPAÑAS", href: "/campanas" },
-  { label: "HISTORIAS", href: "#historias" },
-  { label: "PREGUNTAS", href: "#preguntas" },
 ];
 
 const Leaflet = ({ className = "" }: { className?: string }) => (

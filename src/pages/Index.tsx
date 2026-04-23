@@ -97,6 +97,7 @@ const navItems = [
   { label: "EL SUEÑO", href: "#sueno" },
   { label: "EL ÁRBOL", href: "#arbol" },
   { label: "CLUB DE AMIGOS", href: "#club" },
+  { label: "CAMPAÑAS", href: "/campanas" },
   { label: "HISTORIAS", href: "#historias" },
   { label: "PREGUNTAS", href: "#preguntas" },
 ];

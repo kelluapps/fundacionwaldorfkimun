@@ -89,24 +89,29 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 17px;
+    font-family: 'Nunito', system-ui, sans-serif;
+    font-size: 16px;
     background-image:
       radial-gradient(ellipse at top, hsl(35 60% 92% / 0.6), transparent 60%),
       radial-gradient(ellipse at bottom, hsl(78 25% 90% / 0.4), transparent 60%);
   }
   h1, h2, h3, h4 {
-    font-family: 'Caveat', 'Patrick Hand', cursive;
-    letter-spacing: 0.01em;
+    font-family: 'Amatic SC', 'Caveat', cursive;
+    font-weight: 700;
+    letter-spacing: 0.04em;
   }
   .font-display {
-    font-family: 'Caveat', cursive;
+    font-family: 'Amatic SC', cursive;
+    font-weight: 700;
+    letter-spacing: 0.04em;
   }
   .font-hand {
-    font-family: 'Patrick Hand', cursive;
+    font-family: 'Amatic SC', 'Patrick Hand', cursive;
+    font-weight: 700;
+    letter-spacing: 0.12em;
   }
   .font-body {
-    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-family: 'Nunito', system-ui, sans-serif;
   }
 }
 

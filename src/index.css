@@ -105,13 +105,13 @@
       radial-gradient(ellipse at bottom, hsl(78 25% 90% / 0.4), transparent 60%);
   }
   h1, h2, h3, h4 {
-    font-family: 'Antropos', 'Amatic SC', 'Caveat', cursive;
+    font-family: 'Antropos', 'Amatic SC', 'Caveat', cursive !important;
     font-weight: 400;
     letter-spacing: 0.03em;
     line-height: 1.25;
   }
   .font-display {
-    font-family: 'Antropos', 'Amatic SC', cursive;
+    font-family: 'Antropos', 'Amatic SC', cursive !important;
     font-weight: 400;
     letter-spacing: 0.03em;
     line-height: 1.25;

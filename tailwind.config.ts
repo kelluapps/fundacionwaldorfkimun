@@ -73,9 +73,10 @@ export default {
         },
       },
       fontFamily: {
-        display: ['Caveat', 'cursive'],
-        hand: ['Patrick Hand', 'cursive'],
-        body: ['Cormorant Garamond', 'Georgia', 'serif'],
+        display: ['Antropos', 'Amatic SC', 'Caveat', 'cursive'],
+        hand: ['Amatic SC', 'Patrick Hand', 'cursive'],
+        body: ['Nunito', 'system-ui', 'sans-serif'],
+        antropos: ['Antropos', 'sans-serif'],
       },
       boxShadow: {
         soft: 'var(--shadow-soft)',

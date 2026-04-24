@@ -3,7 +3,7 @@ import { Users, CalendarDays, Leaf } from "lucide-react";
 import logo from "@/assets/logo-kimun.png";
 import heroImg from "@/assets/campanas-hero.jpg";
 import anfiteatroImg from "@/assets/anfiteatro-hero.jpg";
-import carpinteriaImg from "@/assets/campana-carpinteria.jpg";
+import carpinteriaImg from "@/assets/carpinteria-hero.jpg";
 import reforestacionImg from "@/assets/campana-reforestacion.jpg";
 import huertoImg from "@/assets/campana-huerto.jpg";
 
@@ -38,7 +38,12 @@ const campaigns: Campaign[] = [
     name: "Taller de Carpintería",
     description: "Un taller para aprender, crear y compartir oficios que perduran generaciones.",
     image: carpinteriaImg,
-    status: "soon",
+    status: "active",
+    href: "/campanas/carpinteria",
+    raised: 1_250_000,
+    goal: 5_000_000,
+    supporters: 47,
+    daysLeft: 30,
   },
   {
     key: "reforestacion",

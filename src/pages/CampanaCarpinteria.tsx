@@ -463,33 +463,18 @@ const CampanaCarpinteria = () => {
                 placeholder="tu@email.com"
               />
             </label>
+            {donateError && (
+              <p className="text-xs text-destructive text-center">{donateError}</p>
+            )}
             <button
               type="submit"
-              className="mt-2 bg-primary text-primary-foreground rounded-full py-3.5 font-hand text-sm tracking-[0.22em] shadow-card hover:bg-primary/90 transition-all"
+              disabled={donating}
+              className="mt-2 bg-primary text-primary-foreground rounded-full py-3.5 font-hand text-sm tracking-[0.22em] shadow-card hover:bg-primary/90 transition-all disabled:opacity-60 disabled:cursor-wait inline-flex items-center justify-center gap-2"
             >
-              APORTAR
+              {donating && <Loader2 className="w-4 h-4 animate-spin" />}
+              {donating ? "REDIRIGIENDO…" : "APORTAR"}
             </button>
           </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* THANKS MODAL */}
-      <Dialog open={openThanks} onOpenChange={setOpenThanks}>
-        <DialogContent className="bg-card border-border max-w-md rounded-3xl text-center">
-          <DialogHeader>
-            <DialogTitle className="font-display text-3xl text-secondary leading-tight">
-              Gracias por construir este sueño 🔨
-            </DialogTitle>
-          </DialogHeader>
-          <p className="text-foreground/75 pt-2">
-            Tu aporte ayuda a levantar un taller donde la comunidad aprende, crea y florece.
-          </p>
-          <button
-            onClick={() => setOpenThanks(false)}
-            className="mt-3 bg-primary text-primary-foreground rounded-full px-8 py-3 font-hand text-sm tracking-[0.22em] hover:bg-primary/90 transition-all mx-auto"
-          >
-            VOLVER
-          </button>
         </DialogContent>
       </Dialog>
     </div>

@@ -329,14 +329,14 @@ const CampanaCarpinteria = () => {
         </div>
       </section>
 
-      {/* CONTADOR */}
+      {/* CONTADOR + CTA PRINCIPAL */}
       <section className="px-5 lg:px-12 pb-8">
-        <div className="max-w-7xl mx-auto bg-card rounded-3xl shadow-card border border-border/50 p-5 lg:p-7 grid md:grid-cols-[auto_1fr_auto] gap-6 items-center">
+        <div className="max-w-7xl mx-auto bg-card rounded-3xl shadow-card border border-border/50 p-5 lg:p-7 grid md:grid-cols-[auto_1fr] gap-6 items-center">
           <div className="hidden md:block">
             <img src={toolboxImg} alt="Caja de herramientas" className="w-32 lg:w-40 h-auto" />
           </div>
 
-          <div className="text-center">
+          <div className="text-center flex flex-col items-center">
             <h3 className="font-display text-secondary text-xl lg:text-2xl uppercase tracking-wide">
               Elige cuántos martillos quieres aportar
             </h3>
@@ -363,13 +363,20 @@ const CampanaCarpinteria = () => {
             <p className="mt-3 text-sm lg:text-base text-foreground/80">
               Estás aportando: <span className="font-display text-primary text-xl lg:text-2xl">{formatCLP(total)}</span>
             </p>
-          </div>
 
-          <div className="bg-primary-soft/60 rounded-2xl p-5 text-center md:max-w-[220px]">
-            <Heart className="w-6 h-6 text-primary fill-primary mx-auto mb-2" />
-            <p className="font-hand text-[11px] tracking-[0.22em] text-primary">TU APORTE HACE POSIBLE</p>
-            <p className="text-sm text-foreground/80 mt-1 leading-relaxed">
-              este espacio de aprendizaje, creación y comunidad.
+            <p className="mt-4 text-sm lg:text-base text-foreground/80 max-w-md leading-relaxed">
+              Este aporte es para ti, para la comunidad y para hacer realidad este taller.
+            </p>
+
+            <button
+              onClick={() => setOpenCheckout(true)}
+              className="mt-5 w-full md:w-auto inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-full px-7 lg:px-10 py-4 font-hand text-sm lg:text-base tracking-[0.22em] shadow-card hover:bg-primary/90 hover:-translate-y-0.5 transition-all"
+            >
+              <Heart className="w-5 h-5 fill-primary-foreground" />
+              DONA MARTILLOS SOLIDARIOS
+            </button>
+            <p className="mt-3 inline-flex items-center gap-2 text-xs text-foreground/70">
+              <Lock className="w-3.5 h-3.5" /> Aporte seguro y transparente
             </p>
           </div>
         </div>

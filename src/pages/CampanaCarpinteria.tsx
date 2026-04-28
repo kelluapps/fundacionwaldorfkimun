@@ -60,21 +60,51 @@ const CampanaCarpinteria = () => {
   const [donating, setDonating] = useState(false);
   const [donateError, setDonateError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const ctrl = new AbortController();
-    fetchCampaigns(ctrl.signal)
+  const loadCampaign = (signal?: AbortSignal) =>
+    fetchCampaigns(signal)
       .then((items) => {
         const found =
           items.find((c) => c.id === CAMPAIGN_ID) ?? items[0] ?? null;
         if (!found) throw new Error("Sin desafíos");
         setCampaign(found);
+        setCampaignError(null);
       })
       .catch((e: any) => {
         if (e?.name !== "AbortError")
           setCampaignError("No pudimos cargar el cómputo. Intenta nuevamente.");
       })
       .finally(() => setLoadingCampaign(false));
+
+  useEffect(() => {
+    const ctrl = new AbortController();
+    loadCampaign(ctrl.signal);
     return () => ctrl.abort();
+  }, []);
+
+  // Al volver desde Flow (?paid=1), refrescar el cómputo automáticamente.
+  // Reintentamos algunas veces porque la confirmación server-to-server
+  // puede tardar unos segundos en llegar al Worker.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("paid") !== "1") return;
+
+    let cancelled = false;
+    let attempts = 0;
+    const tick = async () => {
+      if (cancelled) return;
+      attempts += 1;
+      await loadCampaign();
+      if (attempts < 6 && !cancelled) setTimeout(tick, 2500);
+    };
+    tick();
+
+    // Limpiar el query param para que no quede en la URL.
+    const cleanUrl = window.location.pathname + window.location.hash;
+    window.history.replaceState({}, "", cleanUrl);
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const total = hammers * HAMMER_PRICE;

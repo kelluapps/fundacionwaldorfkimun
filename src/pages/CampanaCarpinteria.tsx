@@ -196,7 +196,7 @@ const CampanaCarpinteria = () => {
             </p>
             <p className="font-hand text-[11px] tracking-[0.22em] text-foreground/60 mt-5">META</p>
             <p className="font-display text-primary text-4xl lg:text-5xl mt-1">
-              {formatCLP(GOAL)}
+              {loadingCampaign ? "—" : formatCLP(goal)}
             </p>
             <div className="mt-3 h-2.5 w-full rounded-full bg-secondary-soft overflow-hidden">
               <div
@@ -205,9 +205,16 @@ const CampanaCarpinteria = () => {
               />
             </div>
             <div className="flex items-center justify-between mt-2 text-sm text-foreground/75">
-              <span>{formatCLP(RAISED)} recaudado</span>
-              <span className="font-semibold text-primary">{progressPct}% de la meta</span>
+              <span>
+                {loadingCampaign ? "Cargando último cómputo…" : `${formatCLP(raised)} recaudado`}
+              </span>
+              {!loadingCampaign && (
+                <span className="font-semibold text-primary">{progressPct}% de la meta</span>
+              )}
             </div>
+            {campaignError && (
+              <p className="mt-2 text-xs text-destructive">{campaignError}</p>
+            )}
           </div>
 
           {/* Hoy / Mañana */}

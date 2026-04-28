@@ -284,9 +284,16 @@ const CampanaCarpinteria = () => {
             </div>
             <p className="text-sm text-foreground/80 leading-relaxed pt-1">
               Para alcanzar la meta necesitamos{" "}
-              <span className="font-display text-primary text-lg">{TOTAL_HAMMERS.toLocaleString("es-CL")}</span>
+              <span className="font-display text-primary text-lg">
+                {totalHammers > 0 ? totalHammers.toLocaleString("es-CL") : "—"}
+              </span>
               <br />
               <span className="text-primary">martillos solidarios</span>
+              {hammersLeft > 0 && totalHammers > 0 && (
+                <span className="block text-xs text-foreground/60 mt-1">
+                  Faltan {hammersLeft.toLocaleString("es-CL")}
+                </span>
+              )}
             </p>
           </div>
         </div>

@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
   Hammer,
   Heart,
+  Loader2,
   Lock,
   Minus,
   Plus,
@@ -26,13 +27,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  HAMMER_PRICE,
+  formatCLP,
+  fetchCampaigns,
+  createDonation,
+  type KimunCampaign,
+} from "@/lib/kimun-api";
 
-const HAMMER_PRICE = 5_000;
-const GOAL = 5_000_000;
-const RAISED = 1_250_000;
-const TOTAL_HAMMERS = GOAL / HAMMER_PRICE;
-
-const formatCLP = (n: number) => "$" + n.toLocaleString("es-CL");
+const CAMPAIGN_ID = "taller-carpinteria";
 
 const Leaflet = ({ className = "" }: { className?: string }) => (
   <svg viewBox="0 0 60 24" className={className} aria-hidden="true">
@@ -47,22 +50,61 @@ const Leaflet = ({ className = "" }: { className?: string }) => (
 const CampanaCarpinteria = () => {
   const [hammers, setHammers] = useState(2);
   const [openCheckout, setOpenCheckout] = useState(false);
-  const [openThanks, setOpenThanks] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
+  const [campaign, setCampaign] = useState<KimunCampaign | null>(null);
+  const [loadingCampaign, setLoadingCampaign] = useState(true);
+  const [campaignError, setCampaignError] = useState<string | null>(null);
+
+  const [donating, setDonating] = useState(false);
+  const [donateError, setDonateError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const ctrl = new AbortController();
+    fetchCampaigns(ctrl.signal)
+      .then((items) => {
+        const found =
+          items.find((c) => c.id === CAMPAIGN_ID) ?? items[0] ?? null;
+        if (!found) throw new Error("Sin desafíos");
+        setCampaign(found);
+      })
+      .catch((e: any) => {
+        if (e?.name !== "AbortError")
+          setCampaignError("No pudimos cargar el cómputo. Intenta nuevamente.");
+      })
+      .finally(() => setLoadingCampaign(false));
+    return () => ctrl.abort();
+  }, []);
+
   const total = hammers * HAMMER_PRICE;
-  const progressPct = Math.round((RAISED / GOAL) * 100);
+  const goal = campaign?.goal ?? 0;
+  const raised = campaign?.raised ?? 0;
+  const progressPct = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
+  const remaining = Math.max(0, goal - raised);
+  const totalHammers = goal > 0 ? Math.ceil(goal / HAMMER_PRICE) : 0;
+  const hammersLeft = Math.ceil(remaining / HAMMER_PRICE);
 
   const dec = () => setHammers((h) => Math.max(1, h - 1));
   const inc = () => setHammers((h) => h + 1);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setOpenCheckout(false);
-    setOpenThanks(true);
-    setName("");
-    setEmail("");
+    if (donating) return;
+    setDonating(true);
+    setDonateError(null);
+    try {
+      const { redirectUrl } = await createDonation({
+        amount: total,
+        campaignId: campaign?.id ?? CAMPAIGN_ID,
+        name: name || "Donante",
+        email: email || "donante@email.com",
+      });
+      window.location.href = redirectUrl;
+    } catch (err) {
+      setDonating(false);
+      setDonateError("No pudimos iniciar el pago. Intenta nuevamente.");
+    }
   };
 
   return (
@@ -154,7 +196,7 @@ const CampanaCarpinteria = () => {
             </p>
             <p className="font-hand text-[11px] tracking-[0.22em] text-foreground/60 mt-5">META</p>
             <p className="font-display text-primary text-4xl lg:text-5xl mt-1">
-              {formatCLP(GOAL)}
+              {loadingCampaign ? "—" : formatCLP(goal)}
             </p>
             <div className="mt-3 h-2.5 w-full rounded-full bg-secondary-soft overflow-hidden">
               <div
@@ -163,9 +205,16 @@ const CampanaCarpinteria = () => {
               />
             </div>
             <div className="flex items-center justify-between mt-2 text-sm text-foreground/75">
-              <span>{formatCLP(RAISED)} recaudado</span>
-              <span className="font-semibold text-primary">{progressPct}% de la meta</span>
+              <span>
+                {loadingCampaign ? "Cargando último cómputo…" : `${formatCLP(raised)} recaudado`}
+              </span>
+              {!loadingCampaign && (
+                <span className="font-semibold text-primary">{progressPct}% de la meta</span>
+              )}
             </div>
+            {campaignError && (
+              <p className="mt-2 text-xs text-destructive">{campaignError}</p>
+            )}
           </div>
 
           {/* Hoy / Mañana */}
@@ -235,9 +284,16 @@ const CampanaCarpinteria = () => {
             </div>
             <p className="text-sm text-foreground/80 leading-relaxed pt-1">
               Para alcanzar la meta necesitamos{" "}
-              <span className="font-display text-primary text-lg">{TOTAL_HAMMERS.toLocaleString("es-CL")}</span>
+              <span className="font-display text-primary text-lg">
+                {totalHammers > 0 ? totalHammers.toLocaleString("es-CL") : "—"}
+              </span>
               <br />
               <span className="text-primary">martillos solidarios</span>
+              {hammersLeft > 0 && totalHammers > 0 && (
+                <span className="block text-xs text-foreground/60 mt-1">
+                  Faltan {hammersLeft.toLocaleString("es-CL")}
+                </span>
+              )}
             </p>
           </div>
         </div>
@@ -407,33 +463,18 @@ const CampanaCarpinteria = () => {
                 placeholder="tu@email.com"
               />
             </label>
+            {donateError && (
+              <p className="text-xs text-destructive text-center">{donateError}</p>
+            )}
             <button
               type="submit"
-              className="mt-2 bg-primary text-primary-foreground rounded-full py-3.5 font-hand text-sm tracking-[0.22em] shadow-card hover:bg-primary/90 transition-all"
+              disabled={donating}
+              className="mt-2 bg-primary text-primary-foreground rounded-full py-3.5 font-hand text-sm tracking-[0.22em] shadow-card hover:bg-primary/90 transition-all disabled:opacity-60 disabled:cursor-wait inline-flex items-center justify-center gap-2"
             >
-              APORTAR
+              {donating && <Loader2 className="w-4 h-4 animate-spin" />}
+              {donating ? "REDIRIGIENDO…" : "APORTAR"}
             </button>
           </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* THANKS MODAL */}
-      <Dialog open={openThanks} onOpenChange={setOpenThanks}>
-        <DialogContent className="bg-card border-border max-w-md rounded-3xl text-center">
-          <DialogHeader>
-            <DialogTitle className="font-display text-3xl text-secondary leading-tight">
-              Gracias por construir este sueño 🔨
-            </DialogTitle>
-          </DialogHeader>
-          <p className="text-foreground/75 pt-2">
-            Tu aporte ayuda a levantar un taller donde la comunidad aprende, crea y florece.
-          </p>
-          <button
-            onClick={() => setOpenThanks(false)}
-            className="mt-3 bg-primary text-primary-foreground rounded-full px-8 py-3 font-hand text-sm tracking-[0.22em] hover:bg-primary/90 transition-all mx-auto"
-          >
-            VOLVER
-          </button>
         </DialogContent>
       </Dialog>
     </div>

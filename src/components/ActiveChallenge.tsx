@@ -1,41 +1,51 @@
 import { useEffect, useState } from "react";
-import { Loader2, Sprout } from "lucide-react";
-
-type Campaign = {
-  id: string;
-  title: string;
-  goal: number;
-  raised: number;
-};
-
-const API_URL =
-  "https://kimun-donaciones-worker.jorgeaguirrecanciones.workers.dev/campaigns";
-
-const formatCLP = (n: number) => "$" + (n ?? 0).toLocaleString("es-CL");
+import { Loader2, Sprout, Hammer } from "lucide-react";
+import {
+  fetchCampaigns,
+  createDonation,
+  formatCLP,
+  HAMMER_PRICE,
+  type KimunCampaign,
+} from "@/lib/kimun-api";
 
 const ActiveChallenge = () => {
-  const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const [campaign, setCampaign] = useState<KimunCampaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [donating, setDonating] = useState(false);
 
   useEffect(() => {
     const ctrl = new AbortController();
-    fetch(API_URL, { signal: ctrl.signal })
-      .then((r) => {
-        if (!r.ok) throw new Error("No pudimos cargar el desafío.");
-        return r.json();
-      })
-      .then((data) => {
-        const first: Campaign | undefined = data?.items?.[0];
+    fetchCampaigns(ctrl.signal)
+      .then((items) => {
+        const first = items[0];
         if (!first) throw new Error("No hay desafíos disponibles.");
         setCampaign(first);
       })
-      .catch((e) => {
-        if (e.name !== "AbortError") setError(e.message ?? "Error de red.");
+      .catch((e: any) => {
+        if (e?.name !== "AbortError")
+          setError("No pudimos cargar el desafío. Intenta nuevamente.");
       })
       .finally(() => setLoading(false));
     return () => ctrl.abort();
   }, []);
+
+  const handleDonate = async () => {
+    if (!campaign || donating) return;
+    setDonating(true);
+    try {
+      const { redirectUrl } = await createDonation({
+        amount: HAMMER_PRICE,
+        campaignId: campaign.id,
+        name: "Donante",
+        email: "donante@email.com",
+      });
+      window.location.href = redirectUrl;
+    } catch (e) {
+      setDonating(false);
+      setError("No pudimos iniciar la donación. Intenta nuevamente.");
+    }
+  };
 
   return (
     <section className="px-5 lg:px-12 pt-2 pb-8">
@@ -51,7 +61,7 @@ const ActiveChallenge = () => {
           {loading && (
             <div className="flex items-center gap-3 text-foreground/60 py-6">
               <Loader2 className="w-5 h-5 animate-spin" />
-              <span className="text-sm">Cargando desafío…</span>
+              <span className="text-sm">Cargando último cómputo…</span>
             </div>
           )}
 
@@ -60,7 +70,11 @@ const ActiveChallenge = () => {
           )}
 
           {campaign && !loading && !error && (
-            <ChallengeContent campaign={campaign} />
+            <ChallengeContent
+              campaign={campaign}
+              donating={donating}
+              onDonate={handleDonate}
+            />
           )}
         </div>
       </div>
@@ -68,10 +82,21 @@ const ActiveChallenge = () => {
   );
 };
 
-const ChallengeContent = ({ campaign }: { campaign: Campaign }) => {
+const ChallengeContent = ({
+  campaign,
+  donating,
+  onDonate,
+}: {
+  campaign: KimunCampaign;
+  donating: boolean;
+  onDonate: () => void;
+}) => {
   const pct = campaign.goal > 0
     ? Math.min(100, Math.round((campaign.raised / campaign.goal) * 100))
     : 0;
+  const remaining = Math.max(0, campaign.goal - campaign.raised);
+  const hammersFunded = Math.floor(campaign.raised / HAMMER_PRICE);
+  const hammersLeft = Math.ceil(remaining / HAMMER_PRICE);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-center">
@@ -80,9 +105,23 @@ const ChallengeContent = ({ campaign }: { campaign: Campaign }) => {
           {campaign.title}
         </h2>
         <p className="mt-3 text-foreground/75 leading-relaxed text-sm sm:text-base">
-          Cada aporte siembra futuro. Sé parte de este desafío y ayúdanos a
-          hacerlo realidad.
+          Ayúdanos a completar este desafío. Cada aporte siembra futuro.
         </p>
+
+        <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
+          <div className="flex items-center gap-2 text-foreground/80">
+            <Hammer className="w-4 h-4 text-secondary" />
+            <span>
+              <span className="font-semibold text-foreground">{hammersFunded.toLocaleString("es-CL")}</span> martillos financiados
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-foreground/80">
+            <Hammer className="w-4 h-4 text-primary" />
+            <span>
+              <span className="font-semibold text-foreground">{hammersLeft.toLocaleString("es-CL")}</span> martillos restantes
+            </span>
+          </div>
+        </div>
       </div>
 
       <div>
@@ -111,7 +150,6 @@ const ChallengeContent = ({ campaign }: { campaign: Campaign }) => {
           aria-valuenow={pct}
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-label={`Avance ${pct}%`}
         >
           <div
             className="h-full bg-primary rounded-full transition-all duration-700"
@@ -119,14 +157,17 @@ const ChallengeContent = ({ campaign }: { campaign: Campaign }) => {
           />
         </div>
         <p className="mt-2 text-xs text-foreground/60 font-hand tracking-[0.18em]">
-          {pct}% COMPLETADO
+          {pct}% COMPLETADO · FALTAN {formatCLP(remaining)}
         </p>
 
         <button
           type="button"
-          className="mt-5 w-full sm:w-auto bg-primary text-primary-foreground rounded-full px-8 py-3 font-hand text-xs tracking-[0.22em] shadow-card hover:bg-primary/90 hover:-translate-y-0.5 transition-all"
+          onClick={onDonate}
+          disabled={donating}
+          className="mt-5 w-full sm:w-auto bg-primary text-primary-foreground rounded-full px-8 py-3 font-hand text-xs tracking-[0.22em] shadow-card hover:bg-primary/90 hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:cursor-wait inline-flex items-center justify-center gap-2"
         >
-          DONAR
+          {donating && <Loader2 className="w-4 h-4 animate-spin" />}
+          {donating ? "PROCESANDO…" : "DONAR"}
         </button>
       </div>
     </div>

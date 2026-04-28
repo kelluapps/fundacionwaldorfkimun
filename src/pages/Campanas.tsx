@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Users, CalendarDays, Leaf } from "lucide-react";
+import ActiveChallenge from "@/components/ActiveChallenge";
 import logo from "@/assets/logo-kimun.png";
 import heroImg from "@/assets/campanas-hero.jpg";
 import anfiteatroImg from "@/assets/anfiteatro-hero.jpg";
@@ -198,6 +199,9 @@ const Campanas = () => {
           </div>
         </div>
       </section>
+
+      {/* DESAFÍO ACTIVO (API) */}
+      <ActiveChallenge />
 
       {/* PROYECTOS ACTIVOS */}
       <section className="px-5 lg:px-12 pb-14">

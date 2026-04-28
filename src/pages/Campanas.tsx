@@ -200,6 +200,9 @@ const Campanas = () => {
         </div>
       </section>
 
+      {/* DESAFÍO ACTIVO (API) */}
+      <ActiveChallenge />
+
       {/* PROYECTOS ACTIVOS */}
       <section className="px-5 lg:px-12 pb-14">
         <div className="max-w-7xl mx-auto">

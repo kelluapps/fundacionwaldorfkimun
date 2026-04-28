@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
   Hammer,
   Heart,
+  Loader2,
   Lock,
   Minus,
   Plus,
@@ -26,13 +27,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  HAMMER_PRICE,
+  formatCLP,
+  fetchCampaigns,
+  createDonation,
+  type KimunCampaign,
+} from "@/lib/kimun-api";
 
-const HAMMER_PRICE = 5_000;
-const GOAL = 5_000_000;
-const RAISED = 1_250_000;
-const TOTAL_HAMMERS = GOAL / HAMMER_PRICE;
-
-const formatCLP = (n: number) => "$" + n.toLocaleString("es-CL");
+const CAMPAIGN_ID = "taller-carpinteria";
 
 const Leaflet = ({ className = "" }: { className?: string }) => (
   <svg viewBox="0 0 60 24" className={className} aria-hidden="true">
@@ -47,22 +50,61 @@ const Leaflet = ({ className = "" }: { className?: string }) => (
 const CampanaCarpinteria = () => {
   const [hammers, setHammers] = useState(2);
   const [openCheckout, setOpenCheckout] = useState(false);
-  const [openThanks, setOpenThanks] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
+  const [campaign, setCampaign] = useState<KimunCampaign | null>(null);
+  const [loadingCampaign, setLoadingCampaign] = useState(true);
+  const [campaignError, setCampaignError] = useState<string | null>(null);
+
+  const [donating, setDonating] = useState(false);
+  const [donateError, setDonateError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const ctrl = new AbortController();
+    fetchCampaigns(ctrl.signal)
+      .then((items) => {
+        const found =
+          items.find((c) => c.id === CAMPAIGN_ID) ?? items[0] ?? null;
+        if (!found) throw new Error("Sin desafíos");
+        setCampaign(found);
+      })
+      .catch((e: any) => {
+        if (e?.name !== "AbortError")
+          setCampaignError("No pudimos cargar el cómputo. Intenta nuevamente.");
+      })
+      .finally(() => setLoadingCampaign(false));
+    return () => ctrl.abort();
+  }, []);
+
   const total = hammers * HAMMER_PRICE;
-  const progressPct = Math.round((RAISED / GOAL) * 100);
+  const goal = campaign?.goal ?? 0;
+  const raised = campaign?.raised ?? 0;
+  const progressPct = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
+  const remaining = Math.max(0, goal - raised);
+  const totalHammers = goal > 0 ? Math.ceil(goal / HAMMER_PRICE) : 0;
+  const hammersLeft = Math.ceil(remaining / HAMMER_PRICE);
 
   const dec = () => setHammers((h) => Math.max(1, h - 1));
   const inc = () => setHammers((h) => h + 1);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setOpenCheckout(false);
-    setOpenThanks(true);
-    setName("");
-    setEmail("");
+    if (donating) return;
+    setDonating(true);
+    setDonateError(null);
+    try {
+      const { redirectUrl } = await createDonation({
+        amount: total,
+        campaignId: campaign?.id ?? CAMPAIGN_ID,
+        name: name || "Donante",
+        email: email || "donante@email.com",
+      });
+      window.location.href = redirectUrl;
+    } catch (err) {
+      setDonating(false);
+      setDonateError("No pudimos iniciar el pago. Intenta nuevamente.");
+    }
   };
 
   return (

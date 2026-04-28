@@ -416,50 +416,6 @@ const CampanaCarpinteria = () => {
         </div>
       </section>
 
-      {/* CTA FINAL */}
-      <section className="px-5 lg:px-12 pb-14">
-        <div className="max-w-7xl mx-auto rounded-3xl shadow-card border border-border/50 overflow-hidden bg-secondary text-secondary-foreground relative grid lg:grid-cols-[auto_1fr_auto] items-center gap-4 lg:gap-6 p-5 lg:p-7">
-          <img
-            src={comunidadImg}
-            alt="Comunidad creando juntos"
-            className="hidden lg:block w-44 h-44 object-cover rounded-2xl border-4 border-secondary-foreground/10"
-            loading="lazy"
-            width={400}
-            height={400}
-          />
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <span className="text-secondary-foreground/70">»</span>
-              <p className="font-display text-secondary-foreground text-2xl lg:text-3xl uppercase tracking-wide">
-                Haz tu aporte hoy
-              </p>
-              <span className="text-secondary-foreground/70">«</span>
-            </div>
-            <p className="text-sm lg:text-base text-secondary-foreground/85 mb-4">
-              Cada martillo nos acerca a construir este taller para toda la comunidad.
-            </p>
-            <button
-              onClick={() => setOpenCheckout(true)}
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-7 lg:px-9 py-3.5 font-hand text-xs lg:text-sm tracking-[0.22em] shadow-card hover:bg-primary/90 hover:-translate-y-0.5 transition-all"
-            >
-              <Heart className="w-4 h-4 fill-primary-foreground" />
-              DONA MARTILLOS SOLIDARIOS
-            </button>
-            <p className="mt-3 inline-flex items-center gap-2 text-xs text-secondary-foreground/75">
-              <Lock className="w-3.5 h-3.5" /> Aporte seguro y transparente
-            </p>
-          </div>
-          <img
-            src={plantTagImg}
-            alt="Pequeño brote"
-            className="hidden lg:block w-32 h-32 object-contain"
-            loading="lazy"
-            width={300}
-            height={300}
-          />
-        </div>
-      </section>
-
       {/* CHECKOUT MODAL */}
       <Dialog open={openCheckout} onOpenChange={setOpenCheckout}>
         <DialogContent className="bg-card border-border max-w-md rounded-3xl">

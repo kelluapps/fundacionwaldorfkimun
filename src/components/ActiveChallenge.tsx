@@ -14,20 +14,47 @@ const ActiveChallenge = () => {
   const [error, setError] = useState<string | null>(null);
   const [donating, setDonating] = useState(false);
 
-  useEffect(() => {
-    const ctrl = new AbortController();
-    fetchCampaigns(ctrl.signal)
+  const loadCampaign = (signal?: AbortSignal) =>
+    fetchCampaigns(signal)
       .then((items) => {
         const first = items[0];
         if (!first) throw new Error("No hay desafíos disponibles.");
         setCampaign(first);
+        setError(null);
       })
       .catch((e: any) => {
         if (e?.name !== "AbortError")
           setError("No pudimos cargar el desafío. Intenta nuevamente.");
       })
       .finally(() => setLoading(false));
+
+  useEffect(() => {
+    const ctrl = new AbortController();
+    loadCampaign(ctrl.signal);
     return () => ctrl.abort();
+  }, []);
+
+  // Refresco automático al volver de Flow (?paid=1).
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("paid") !== "1") return;
+
+    let cancelled = false;
+    let attempts = 0;
+    const tick = async () => {
+      if (cancelled) return;
+      attempts += 1;
+      await loadCampaign();
+      if (attempts < 6 && !cancelled) setTimeout(tick, 2500);
+    };
+    tick();
+
+    const cleanUrl = window.location.pathname + window.location.hash;
+    window.history.replaceState({}, "", cleanUrl);
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleDonate = async () => {

@@ -192,32 +192,38 @@ const CampanaCarpinteria = () => {
         Tu aporte hace posible este taller para niños, adultos y toda la comunidad.
       </p>
 
-      <div className="mt-5 grid grid-cols-[auto_1fr] gap-5 items-center">
-        <div className="inline-flex items-center gap-3 bg-card rounded-full px-3 py-2 border border-border/50 shadow-sm">
+      <div className="mt-5 grid grid-cols-[auto_1fr] gap-4 sm:gap-5 items-center">
+        <div className="inline-flex items-center gap-2 sm:gap-3 bg-card rounded-full px-2.5 py-2 border border-border/50 shadow-sm shrink-0">
           <button
             onClick={dec}
             aria-label="Quitar martillo"
-            className="w-10 h-10 rounded-full bg-background text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-background text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all"
           >
             <Minus className="w-5 h-5" />
           </button>
-          <span className="font-display text-secondary text-3xl tabular-nums w-10 text-center">
+          <span
+            className="font-display text-secondary tabular-nums w-8 sm:w-10 text-center"
+            style={{ fontSize: "clamp(20px, 5vw, 30px)", fontWeight: 600, lineHeight: 1 }}
+          >
             {hammers}
           </span>
           <button
             onClick={inc}
             aria-label="Agregar martillo"
-            className="w-10 h-10 rounded-full bg-primary-soft text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary-soft text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all"
           >
             <Plus className="w-5 h-5" />
           </button>
         </div>
-        <div className="border-l border-border/50 pl-4">
+        <div className="border-l border-border/50 pl-3 sm:pl-4 min-w-0">
           <p className="text-xs text-foreground/70">Estás aportando:</p>
-          <p className="font-display text-primary text-3xl lg:text-4xl leading-none mt-1">
+          <p
+            className="font-display text-primary leading-none mt-1 overflow-hidden text-ellipsis whitespace-nowrap"
+            style={{ fontSize: "clamp(20px, 5vw, 30px)", fontWeight: 600 }}
+          >
             {formatCLP(total)}
           </p>
-          <p className="text-[11px] text-foreground/60 mt-1">
+          <p className="text-[11px] text-foreground/60 mt-1 truncate">
             {hammers} {hammers === 1 ? "martillo" : "martillos"}
           </p>
         </div>

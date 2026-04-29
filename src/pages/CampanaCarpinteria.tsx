@@ -2,25 +2,18 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,
-  ArrowRight,
   Hammer,
   Heart,
+  Leaf,
   Loader2,
   Lock,
   Minus,
   Plus,
   Sprout,
-  TreePine,
   Users,
-  Wrench,
 } from "lucide-react";
 import logo from "@/assets/logo-kimun.png";
 import heroImg from "@/assets/carpinteria-hero.jpg";
-import hoyImg from "@/assets/carpinteria-hoy.jpg";
-import mananaImg from "@/assets/carpinteria-manana.jpg";
-import comunidadImg from "@/assets/carpinteria-comunidad.jpg";
-import toolboxImg from "@/assets/carpinteria-toolbox.png";
-import plantTagImg from "@/assets/carpinteria-plant-tag.png";
 import {
   Dialog,
   DialogContent,
@@ -48,7 +41,7 @@ const Leaflet = ({ className = "" }: { className?: string }) => (
 );
 
 const CampanaCarpinteria = () => {
-  const [hammers, setHammers] = useState(2);
+  const [hammers, setHammers] = useState(3);
   const [openCheckout, setOpenCheckout] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -63,8 +56,7 @@ const CampanaCarpinteria = () => {
   const loadCampaign = (signal?: AbortSignal) =>
     fetchCampaigns(signal)
       .then((items) => {
-        const found =
-          items.find((c) => c.id === CAMPAIGN_ID) ?? items[0] ?? null;
+        const found = items.find((c) => c.id === CAMPAIGN_ID) ?? items[0] ?? null;
         if (!found) throw new Error("Sin desafíos");
         setCampaign(found);
         setCampaignError(null);
@@ -81,13 +73,10 @@ const CampanaCarpinteria = () => {
     return () => ctrl.abort();
   }, []);
 
-  // Al volver desde Flow (?paid=1), refrescar el cómputo automáticamente.
-  // Reintentamos algunas veces porque la confirmación server-to-server
-  // puede tardar unos segundos en llegar al Worker.
+  // Refresh tras volver de Flow (?paid=1)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("paid") !== "1") return;
-
     let cancelled = false;
     let attempts = 0;
     const tick = async () => {
@@ -97,11 +86,7 @@ const CampanaCarpinteria = () => {
       if (attempts < 6 && !cancelled) setTimeout(tick, 2500);
     };
     tick();
-
-    // Limpiar el query param para que no quede en la URL.
-    const cleanUrl = window.location.pathname + window.location.hash;
-    window.history.replaceState({}, "", cleanUrl);
-
+    window.history.replaceState({}, "", window.location.pathname + window.location.hash);
     return () => {
       cancelled = true;
     };
@@ -111,9 +96,9 @@ const CampanaCarpinteria = () => {
   const goal = campaign?.goal ?? 0;
   const raised = campaign?.raised ?? 0;
   const progressPct = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
-  const remaining = Math.max(0, goal - raised);
   const totalHammers = goal > 0 ? Math.ceil(goal / HAMMER_PRICE) : 0;
-  const hammersLeft = Math.ceil(remaining / HAMMER_PRICE);
+  const hammersAchieved = Math.floor(raised / HAMMER_PRICE);
+  const hammersLeft = Math.max(0, totalHammers - hammersAchieved);
 
   const dec = () => setHammers((h) => Math.max(1, h - 1));
   const inc = () => setHammers((h) => h + 1);
@@ -131,11 +116,114 @@ const CampanaCarpinteria = () => {
         email: email || "donante@email.com",
       });
       window.location.href = redirectUrl;
-    } catch (err) {
+    } catch {
       setDonating(false);
       setDonateError("No pudimos iniciar el pago. Intenta nuevamente.");
     }
   };
+
+  /* ============ Sub-bloques reutilizables ============ */
+
+  const ComputoBlock = (
+    <div className="bg-card rounded-3xl shadow-card border border-border/50 p-5 lg:p-7">
+      <div className="grid grid-cols-3 gap-3 lg:gap-5">
+        <div>
+          <p className="font-hand text-[10px] tracking-[0.22em] text-foreground/60">META</p>
+          <p className="font-display text-primary text-2xl lg:text-4xl mt-1 leading-none">
+            {loadingCampaign ? "—" : formatCLP(goal)}
+          </p>
+        </div>
+        <div className="border-l border-border/60 pl-3 lg:pl-5">
+          <p className="font-hand text-[10px] tracking-[0.22em] text-foreground/60">RECAUDADO</p>
+          <p className="font-display text-secondary text-2xl lg:text-4xl mt-1 leading-none">
+            {loadingCampaign ? "—" : formatCLP(raised)}
+          </p>
+        </div>
+        <div className="border-l border-border/60 pl-3 lg:pl-5">
+          <p className="font-hand text-[10px] tracking-[0.22em] text-foreground/60">MARTILLOS</p>
+          <p className="font-display text-primary text-2xl lg:text-4xl mt-1 leading-none flex items-center gap-1">
+            <Hammer className="w-5 h-5 lg:w-7 lg:h-7" />
+            {loadingCampaign ? "—" : hammersAchieved.toLocaleString("es-CL")}
+          </p>
+          <p className="text-[11px] lg:text-xs text-foreground/60 mt-1">
+            de {totalHammers.toLocaleString("es-CL")}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-5 relative h-4 w-full rounded-full bg-secondary-soft overflow-hidden">
+        <div
+          className="h-full bg-primary rounded-full transition-all duration-700 flex items-center justify-center text-[11px] font-semibold text-primary-foreground"
+          style={{ width: `${Math.max(progressPct, 8)}%` }}
+        >
+          {!loadingCampaign && progressPct > 0 && `${progressPct}%`}
+        </div>
+      </div>
+      <p className="mt-3 text-center text-xs lg:text-sm text-foreground/75 inline-flex items-center justify-center gap-2 w-full">
+        <Heart className="w-3.5 h-3.5 text-primary fill-primary" />
+        {hammersLeft > 0
+          ? `Faltan ${hammersLeft.toLocaleString("es-CL")} martillos para alcanzar el sueño`
+          : "Cada martillo nos acerca a este sueño"}
+      </p>
+      {campaignError && (
+        <p className="mt-2 text-xs text-destructive text-center">{campaignError}</p>
+      )}
+    </div>
+  );
+
+  const DonacionBlock = (
+    <div className="bg-primary-soft/60 rounded-3xl shadow-card border border-primary/15 p-5 lg:p-7">
+      <h3 className="font-display text-secondary text-2xl lg:text-3xl uppercase tracking-wide flex items-center gap-2">
+        Dona martillos solidarios
+        <Hammer className="w-6 h-6 text-primary" />
+      </h3>
+      <p className="mt-2 text-sm text-foreground/80">
+        Tu aporte hace posible este taller para niños, adultos y toda la comunidad.
+      </p>
+
+      <div className="mt-5 grid grid-cols-[auto_1fr] gap-5 items-center">
+        <div className="inline-flex items-center gap-3 bg-card rounded-full px-3 py-2 border border-border/50 shadow-sm">
+          <button
+            onClick={dec}
+            aria-label="Quitar martillo"
+            className="w-10 h-10 rounded-full bg-background text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all"
+          >
+            <Minus className="w-5 h-5" />
+          </button>
+          <span className="font-display text-secondary text-3xl tabular-nums w-10 text-center">
+            {hammers}
+          </span>
+          <button
+            onClick={inc}
+            aria-label="Agregar martillo"
+            className="w-10 h-10 rounded-full bg-primary-soft text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all"
+          >
+            <Plus className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="border-l border-border/50 pl-4">
+          <p className="text-xs text-foreground/70">Estás aportando:</p>
+          <p className="font-display text-primary text-3xl lg:text-4xl leading-none mt-1">
+            {formatCLP(total)}
+          </p>
+          <p className="text-[11px] text-foreground/60 mt-1">
+            {hammers} {hammers === 1 ? "martillo" : "martillos"}
+          </p>
+        </div>
+      </div>
+
+      <button
+        onClick={() => setOpenCheckout(true)}
+        className="mt-5 w-full inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-full px-6 py-4 font-hand text-sm lg:text-base tracking-[0.2em] shadow-card hover:bg-primary/90 hover:-translate-y-0.5 transition-all"
+      >
+        <Heart className="w-5 h-5 fill-primary-foreground" />
+        DONA MARTILLOS SOLIDARIOS
+      </button>
+      <p className="mt-3 inline-flex items-center justify-center gap-2 text-xs text-foreground/70 w-full">
+        <Lock className="w-3.5 h-3.5" /> Pago seguro con Flow
+      </p>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-warm overflow-x-hidden">
@@ -143,275 +231,118 @@ const CampanaCarpinteria = () => {
       <header className="relative z-20 px-5 lg:px-12 pt-5 pb-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-3 shrink-0">
-            <img src={logo} alt="Waldorf Kimún" className="h-20 lg:h-24 w-auto" />
+            <img src={logo} alt="Waldorf Kimún" className="h-16 lg:h-20 w-auto" />
           </Link>
           <nav className="hidden lg:flex items-center gap-7 font-hand text-[13px] tracking-[0.18em] text-foreground/80">
             <Link to="/" className="hover:text-primary transition-colors">EL SUEÑO</Link>
             <Link to="/campanas" className="text-primary border-b-2 border-primary pb-1">CAMPAÑAS</Link>
           </nav>
-          <a
-            href="/"
-            className="bg-primary text-primary-foreground rounded-full px-5 lg:px-7 py-2.5 lg:py-3 font-hand text-[11px] lg:text-xs tracking-[0.2em] shadow-card hover:bg-primary/90 transition-all hover:-translate-y-0.5"
+          <Link
+            to="/campanas"
+            className="hidden sm:inline-flex items-center gap-1 text-secondary font-hand text-[11px] tracking-widest"
           >
-            QUIERO SER PARTE
-          </a>
+            <ArrowLeft className="w-3.5 h-3.5" /> CAMPAÑAS
+          </Link>
         </div>
-        <Link
-          to="/campanas"
-          className="inline-flex items-center gap-1 text-secondary font-hand text-[11px] tracking-widest mt-3 lg:mt-4"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" /> VOLVER A CAMPAÑAS
-        </Link>
       </header>
 
-      {/* HERO */}
-      <section className="px-5 lg:px-12 pb-8">
-        <div className="max-w-7xl mx-auto bg-card rounded-3xl shadow-card border border-border/50 overflow-hidden grid lg:grid-cols-[1fr_1.1fr]">
-          <div className="p-6 lg:p-12 flex flex-col justify-center order-2 lg:order-1">
-            <div className="self-start bg-primary text-primary-foreground rounded-full px-5 py-1.5 font-hand text-[10px] lg:text-[11px] tracking-[0.22em] shadow-card">
-              CAMPAÑA DEL MES DE MAYO
+      {/* HERO + CÓMPUTO + DONACIÓN (above-the-fold focus) */}
+      <section className="px-4 sm:px-5 lg:px-12 pb-8">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-[1.3fr_1fr] gap-5 lg:gap-7 items-start">
+          {/* IZQUIERDA: Hero + Cómputo */}
+          <div className="flex flex-col gap-5">
+            {/* HERO */}
+            <div className="bg-card rounded-3xl shadow-card border border-border/50 overflow-hidden grid sm:grid-cols-[1.1fr_1fr]">
+              <div className="p-5 lg:p-8 flex flex-col justify-center">
+                <div className="self-start bg-primary text-primary-foreground rounded-full px-4 py-1.5 font-hand text-[10px] tracking-[0.22em] shadow-card">
+                  CAMPAÑA DEL MES DE MAYO
+                </div>
+                <p className="font-display text-secondary uppercase text-lg lg:text-xl mt-3 tracking-wide">
+                  Creemos juntos un
+                </p>
+                <h1 className="font-display text-secondary text-4xl sm:text-5xl lg:text-6xl uppercase leading-[0.95] tracking-wide mt-1">
+                  Taller de<br />Carpintería
+                </h1>
+                <div className="flex items-center gap-2 mt-2">
+                  <Leaflet className="w-7 h-3 text-secondary -scale-x-100" />
+                  <p className="font-display text-primary text-base lg:text-lg uppercase tracking-wide">
+                    Para toda la comunidad
+                  </p>
+                  <Leaflet className="w-7 h-3 text-secondary" />
+                </div>
+              </div>
+              <div className="relative min-h-[200px] sm:min-h-full">
+                <img
+                  src={heroImg}
+                  alt="Taller de carpintería bajo un gran árbol"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  width={1280}
+                  height={960}
+                />
+              </div>
             </div>
-            <p className="font-display text-secondary uppercase text-2xl lg:text-3xl mt-4 tracking-wide">
-              Creemos juntos un
-            </p>
-            <h1 className="font-display text-secondary text-5xl sm:text-6xl lg:text-[5.5rem] uppercase leading-[0.95] tracking-wide mt-1">
-              Taller de<br />Carpintería
-            </h1>
-            <div className="flex items-center gap-2 mt-3">
-              <Leaflet className="w-8 h-4 text-secondary -scale-x-100" />
-              <p className="font-display text-primary text-xl lg:text-2xl uppercase tracking-wide">
-                Para toda la comunidad
+
+            {/* CÓMPUTO */}
+            {ComputoBlock}
+
+            {/* MOBILE/TABLET: Donación inline aquí */}
+            <div className="lg:hidden">{DonacionBlock}</div>
+          </div>
+
+          {/* DERECHA: Donación sticky en desktop */}
+          <aside className="hidden lg:block">
+            <div className="lg:sticky lg:top-6">{DonacionBlock}</div>
+          </aside>
+        </div>
+      </section>
+
+      {/* CONTENIDO: descripción + beneficios */}
+      <section className="px-4 sm:px-5 lg:px-12 pb-10">
+        <div className="max-w-7xl mx-auto bg-card rounded-3xl shadow-card border border-border/50 p-5 lg:p-8">
+          <div className="flex items-center gap-2">
+            <Leaf className="w-5 h-5 text-secondary" />
+            <h2 className="font-display text-secondary text-xl lg:text-2xl uppercase tracking-wide">
+              Sobre este taller
+            </h2>
+          </div>
+          <p className="font-display text-secondary text-lg lg:text-xl mt-3">
+            Un espacio para aprender, crear, compartir y construir juntos.
+          </p>
+          <p className="mt-3 text-sm lg:text-base text-foreground/80 leading-relaxed max-w-3xl">
+            Este taller será para los niños de Kimün, y en las tardes estará abierto
+            para toda la comunidad, especialmente para personas adultas mayores que
+            quieran iniciarse o seguir creciendo en el oficio de la carpintería.
+          </p>
+
+          <ul className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-5 lg:gap-7">
+            <li className="text-center sm:text-left flex flex-col items-center sm:items-start gap-2">
+              <Heart className="w-7 h-7 text-primary" />
+              <p className="font-hand text-xs tracking-widest text-secondary">PARA LOS NIÑOS</p>
+              <p className="text-sm text-foreground/75 leading-snug">
+                Aprender haciendo, desde pequeños.
               </p>
-              <Leaflet className="w-8 h-4 text-secondary" />
-            </div>
-            <p className="mt-6 text-foreground/85 text-base lg:text-lg leading-relaxed max-w-md">
-              Un espacio para aprender, crear, compartir y construir juntos.
-            </p>
-            <p className="mt-4 text-sm lg:text-[15px] text-foreground/75 leading-relaxed max-w-lg">
-              Este taller será para los niños de Kimün, y en las tardes estará abierto
-              para toda la comunidad, especialmente para personas adultas mayores que
-              quieran iniciarse o seguir creciendo en el oficio de la carpintería.
-            </p>
-          </div>
-          <div className="relative min-h-[260px] lg:min-h-full order-1 lg:order-2">
-            <img
-              src={heroImg}
-              alt="Taller de carpintería bajo un gran árbol"
-              className="absolute inset-0 w-full h-full object-cover"
-              width={1280}
-              height={960}
-            />
-            {/* Badge esquina */}
-            <div className="hidden lg:flex absolute bottom-5 right-5 w-32 h-32 rounded-full bg-card/95 backdrop-blur shadow-card border border-border/50 flex-col items-center justify-center text-center font-hand text-[10px] tracking-[0.18em] text-secondary p-3">
-              <span>SÉ PARTE DE</span>
-              <Leaflet className="w-7 h-3 text-secondary my-1" />
-              <span className="font-display text-primary text-base tracking-wide normal-case">NUESTRO<br />SUEÑO</span>
-              <Heart className="w-3 h-3 text-primary mt-1 fill-primary" />
-            </div>
-          </div>
-        </div>
-      </section>
+            </li>
+            <li className="text-center sm:text-left flex flex-col items-center sm:items-start gap-2">
+              <Users className="w-7 h-7 text-primary" />
+              <p className="font-hand text-xs tracking-widest text-secondary">PARA LA COMUNIDAD</p>
+              <p className="text-sm text-foreground/75 leading-snug">
+                Abierto a todas las edades.
+              </p>
+            </li>
+            <li className="text-center sm:text-left flex flex-col items-center sm:items-start gap-2">
+              <Sprout className="w-7 h-7 text-secondary" />
+              <p className="font-hand text-xs tracking-widest text-secondary">PARA EL FUTURO</p>
+              <p className="text-sm text-foreground/75 leading-snug">
+                Un oficio que transforma y conecta.
+              </p>
+            </li>
+          </ul>
 
-      {/* META + HOY/MAÑANA */}
-      <section className="px-5 lg:px-12 pb-8">
-        <div className="max-w-7xl mx-auto bg-card rounded-3xl shadow-card border border-border/50 p-5 lg:p-8 grid lg:grid-cols-[1fr_1.4fr] gap-6 lg:gap-8 items-center">
-          {/* Meta */}
-          <div>
-            <h3 className="font-display text-secondary text-2xl lg:text-3xl uppercase tracking-wide">
-              Nuestro sueño
-            </h3>
-            <p className="mt-3 text-sm lg:text-[15px] text-foreground/80 leading-relaxed">
-              Transformemos este espacio en un taller de carpintería seguro, hermoso
-              y equipado para el aprendizaje y la creación.
+          <div className="mt-6 bg-secondary-soft/60 border border-secondary/20 rounded-2xl px-4 py-3 text-center">
+            <p className="text-sm text-foreground/80 inline-flex items-center justify-center gap-2">
+              <Leaf className="w-4 h-4 text-secondary" />
+              Tu aporte es para ti, para la comunidad y para hacer realidad este taller.
             </p>
-            <p className="font-hand text-[11px] tracking-[0.22em] text-foreground/60 mt-5">META</p>
-            <p className="font-display text-primary text-4xl lg:text-5xl mt-1">
-              {loadingCampaign ? "—" : formatCLP(goal)}
-            </p>
-            <div className="mt-3 h-2.5 w-full rounded-full bg-secondary-soft overflow-hidden">
-              <div
-                className="h-full bg-secondary rounded-full transition-all"
-                style={{ width: `${progressPct}%` }}
-              />
-            </div>
-            <div className="flex items-center justify-between mt-2 text-sm text-foreground/75">
-              <span>
-                {loadingCampaign ? "Cargando último cómputo…" : `${formatCLP(raised)} recaudado`}
-              </span>
-              {!loadingCampaign && (
-                <span className="font-semibold text-primary">{progressPct}% de la meta</span>
-              )}
-            </div>
-            {campaignError && (
-              <p className="mt-2 text-xs text-destructive">{campaignError}</p>
-            )}
-          </div>
-
-          {/* Hoy / Mañana */}
-          <div className="grid grid-cols-2 gap-3 lg:gap-5 relative">
-            <div className="relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 bg-secondary text-secondary-foreground rounded-full px-5 py-1 font-hand text-[10px] tracking-[0.22em] shadow-card">
-                HOY
-              </div>
-              <div className="rounded-2xl overflow-hidden aspect-[4/3] border border-border/50">
-                <img
-                  src={hoyImg}
-                  alt="Taller actualmente"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                  width={800}
-                  height={600}
-                />
-              </div>
-            </div>
-            <div className="relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 bg-secondary text-secondary-foreground rounded-full px-5 py-1 font-hand text-[10px] tracking-[0.22em] shadow-card">
-                MAÑANA
-              </div>
-              <div className="rounded-2xl overflow-hidden aspect-[4/3] border border-border/50">
-                <img
-                  src={mananaImg}
-                  alt="Taller transformado"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                  width={800}
-                  height={600}
-                />
-              </div>
-            </div>
-            {/* Flecha de transformación */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-card rounded-full p-1.5 shadow-card border border-border/50">
-              <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5 text-secondary" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* MARTILLOS — INFO */}
-      <section className="px-5 lg:px-12 pb-8">
-        <div className="max-w-7xl mx-auto bg-card rounded-3xl shadow-card border border-border/50 p-5 lg:p-7 grid md:grid-cols-3 gap-5 lg:gap-7">
-          <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-full bg-secondary-soft flex items-center justify-center shrink-0">
-              <Hammer className="w-6 h-6 text-secondary" />
-            </div>
-            <p className="text-sm text-foreground/80 leading-relaxed pt-1">
-              <span className="font-semibold text-foreground">Cada martillo suma</span> para construir este sueño.
-              Con tu aporte, equipamos, mejoramos y damos vida a un taller que formará, conectará y transformará.
-            </p>
-          </div>
-          <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-full bg-primary-soft flex items-center justify-center shrink-0">
-              <Heart className="w-6 h-6 text-primary fill-primary" />
-            </div>
-            <p className="text-sm text-foreground/80 leading-relaxed pt-1">
-              Cada martillo solidario<br />
-              vale <span className="font-display text-primary text-lg">{formatCLP(HAMMER_PRICE)}</span>
-            </p>
-          </div>
-          <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-full bg-secondary-soft flex items-center justify-center shrink-0">
-              <Sprout className="w-6 h-6 text-secondary" />
-            </div>
-            <p className="text-sm text-foreground/80 leading-relaxed pt-1">
-              Para alcanzar la meta necesitamos{" "}
-              <span className="font-display text-primary text-lg">
-                {totalHammers > 0 ? totalHammers.toLocaleString("es-CL") : "—"}
-              </span>
-              <br />
-              <span className="text-primary">martillos solidarios</span>
-              {hammersLeft > 0 && totalHammers > 0 && (
-                <span className="block text-xs text-foreground/60 mt-1">
-                  Faltan {hammersLeft.toLocaleString("es-CL")}
-                </span>
-              )}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* CONTADOR + CTA PRINCIPAL */}
-      <section className="px-5 lg:px-12 pb-8">
-        <div className="max-w-7xl mx-auto bg-card rounded-3xl shadow-card border border-border/50 p-5 lg:p-7 grid md:grid-cols-[auto_1fr] gap-6 items-center">
-          <div className="hidden md:block">
-            <img src={toolboxImg} alt="Caja de herramientas" className="w-32 lg:w-40 h-auto" />
-          </div>
-
-          <div className="text-center flex flex-col items-center">
-            <h3 className="font-display text-secondary text-xl lg:text-2xl uppercase tracking-wide">
-              Elige cuántos martillos quieres aportar
-            </h3>
-            <div className="mt-5 inline-flex items-center gap-5 lg:gap-7 bg-background/60 rounded-full px-4 py-2 border border-border/50">
-              <button
-                onClick={dec}
-                aria-label="Quitar martillo"
-                className="w-11 h-11 rounded-full bg-primary-soft text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all"
-              >
-                <Minus className="w-5 h-5" />
-              </button>
-              <div className="flex items-center gap-3">
-                <Hammer className="w-7 h-7 text-secondary" />
-                <span className="font-display text-secondary text-4xl lg:text-5xl tabular-nums">{hammers}</span>
-              </div>
-              <button
-                onClick={inc}
-                aria-label="Agregar martillo"
-                className="w-11 h-11 rounded-full bg-primary-soft text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all"
-              >
-                <Plus className="w-5 h-5" />
-              </button>
-            </div>
-            <p className="mt-3 text-sm lg:text-base text-foreground/80">
-              Estás aportando: <span className="font-display text-primary text-xl lg:text-2xl">{formatCLP(total)}</span>
-            </p>
-
-            <p className="mt-4 text-sm lg:text-base text-foreground/80 max-w-md leading-relaxed">
-              Este aporte es para ti, para la comunidad y para hacer realidad este taller.
-            </p>
-
-            <button
-              onClick={() => setOpenCheckout(true)}
-              className="mt-5 w-full md:w-auto inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-full px-7 lg:px-10 py-4 font-hand text-sm lg:text-base tracking-[0.22em] shadow-card hover:bg-primary/90 hover:-translate-y-0.5 transition-all"
-            >
-              <Heart className="w-5 h-5 fill-primary-foreground" />
-              DONA MARTILLOS SOLIDARIOS
-            </button>
-            <p className="mt-3 inline-flex items-center gap-2 text-xs text-foreground/70">
-              <Lock className="w-3.5 h-3.5" /> Aporte seguro y transparente
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* CON TU APORTE */}
-      <section className="px-5 lg:px-12 pb-8">
-        <div className="max-w-7xl mx-auto bg-card rounded-3xl shadow-card border border-border/50 p-5 lg:p-8 grid lg:grid-cols-[1fr_auto] gap-6 items-center">
-          <div>
-            <div className="flex items-center justify-center gap-3">
-              <Leaflet className="w-10 h-4 text-secondary -scale-x-100" />
-              <h3 className="font-display text-secondary text-xl lg:text-2xl uppercase tracking-wide text-center">
-                Con tu aporte, esto será posible
-              </h3>
-              <Leaflet className="w-10 h-4 text-secondary" />
-            </div>
-            <ul className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
-              {[
-                { icon: <TreePine className="w-7 h-7 text-secondary" />, t: "Un espacio seguro y acogedor para aprender y crear." },
-                { icon: <Wrench className="w-7 h-7 text-primary" />, t: "Herramientas y materiales de calidad para todos." },
-                { icon: <Users className="w-7 h-7 text-secondary" />, t: "Talleres para niños, jóvenes y adultos mayores." },
-                { icon: <Heart className="w-7 h-7 text-primary fill-primary" />, t: "Comunidad, encuentro y crecimiento a través del hacer." },
-              ].map((it, i) => (
-                <li key={i} className="text-center flex flex-col items-center gap-2">
-                  {it.icon}
-                  <p className="text-xs lg:text-sm text-foreground/80 leading-snug">{it.t}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="hidden lg:block bg-secondary-soft/60 rounded-2xl p-5 max-w-[220px] text-center border border-secondary/20">
-            <p className="font-display text-secondary italic text-lg leading-snug">
-              "Cuando construimos juntos, construimos futuro."
-            </p>
-            <Heart className="w-5 h-5 text-primary fill-primary mx-auto mt-3" />
           </div>
         </div>
       </section>
@@ -421,7 +352,7 @@ const CampanaCarpinteria = () => {
         <DialogContent className="bg-card border-border max-w-md rounded-3xl">
           <DialogHeader>
             <DialogTitle className="font-display text-2xl lg:text-3xl text-secondary text-center leading-tight">
-              Estás donando {hammers} {hammers === 1 ? "martillo" : "martillos"} solidario{hammers === 1 ? "" : "s"}
+              Estás a un paso de donar tus martillos solidarios
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
@@ -465,8 +396,11 @@ const CampanaCarpinteria = () => {
               className="mt-2 bg-primary text-primary-foreground rounded-full py-3.5 font-hand text-sm tracking-[0.22em] shadow-card hover:bg-primary/90 transition-all disabled:opacity-60 disabled:cursor-wait inline-flex items-center justify-center gap-2"
             >
               {donating && <Loader2 className="w-4 h-4 animate-spin" />}
-              {donating ? "REDIRIGIENDO…" : "APORTAR"}
+              {donating ? "REDIRIGIENDO…" : "CONTINUAR AL PAGO SEGURO"}
             </button>
+            <p className="text-[11px] text-foreground/60 text-center inline-flex items-center justify-center gap-1.5">
+              <Lock className="w-3 h-3" /> Pago seguro procesado por Flow
+            </p>
           </form>
         </DialogContent>
       </Dialog>

@@ -126,34 +126,45 @@ const CampanaCarpinteria = () => {
 
   const ComputoBlock = (
     <div className="bg-card rounded-3xl shadow-card border border-border/50 p-5 lg:p-7">
-      <div className="grid grid-cols-3 gap-3 lg:gap-5">
-        <div>
-          <p className="font-hand text-[10px] tracking-[0.22em] text-foreground/60">META</p>
-          <p className="font-display text-primary text-2xl lg:text-4xl mt-1 leading-none">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 lg:gap-5 items-center" style={{ minHeight: 78 }}>
+        <div className="min-w-0">
+          <p className="font-hand text-[10px] tracking-[0.18em] text-foreground/60 truncate">META</p>
+          <p
+            className="font-display text-primary mt-1 leading-none overflow-hidden text-ellipsis whitespace-nowrap"
+            style={{ fontSize: "clamp(18px, 4.5vw, 28px)", fontWeight: 600 }}
+          >
             {loadingCampaign ? "—" : formatCLP(goal)}
           </p>
         </div>
-        <div className="border-l border-border/60 pl-3 lg:pl-5">
-          <p className="font-hand text-[10px] tracking-[0.22em] text-foreground/60">RECAUDADO</p>
-          <p className="font-display text-secondary text-2xl lg:text-4xl mt-1 leading-none">
+        <div className="border-l border-border/60 pl-2 sm:pl-3 lg:pl-5 min-w-0">
+          <p className="font-hand text-[10px] tracking-[0.18em] text-foreground/60 truncate">RECAUDADO</p>
+          <p
+            className="font-display text-secondary mt-1 leading-none overflow-hidden text-ellipsis whitespace-nowrap"
+            style={{ fontSize: "clamp(18px, 4.5vw, 28px)", fontWeight: 600 }}
+          >
             {loadingCampaign ? "—" : formatCLP(raised)}
           </p>
         </div>
-        <div className="border-l border-border/60 pl-3 lg:pl-5">
-          <p className="font-hand text-[10px] tracking-[0.22em] text-foreground/60">MARTILLOS</p>
-          <p className="font-display text-primary text-2xl lg:text-4xl mt-1 leading-none flex items-center gap-1">
-            <Hammer className="w-5 h-5 lg:w-7 lg:h-7" />
-            {loadingCampaign ? "—" : hammersAchieved.toLocaleString("es-CL")}
+        <div className="border-l border-border/60 pl-2 sm:pl-3 lg:pl-5 min-w-0">
+          <p className="font-hand text-[10px] tracking-[0.18em] text-foreground/60 truncate">MARTILLOS</p>
+          <p
+            className="font-display text-primary mt-1 leading-none flex items-center gap-1 overflow-hidden whitespace-nowrap"
+            style={{ fontSize: "clamp(16px, 4vw, 24px)", fontWeight: 600 }}
+          >
+            <Hammer className="w-4 h-4 lg:w-6 lg:h-6 shrink-0" />
+            <span className="overflow-hidden text-ellipsis">
+              {loadingCampaign ? "—" : hammersAchieved.toLocaleString("es-CL")}
+            </span>
           </p>
-          <p className="text-[11px] lg:text-xs text-foreground/60 mt-1">
+          <p className="text-[11px] lg:text-xs text-foreground/60 mt-1 truncate">
             de {totalHammers.toLocaleString("es-CL")}
           </p>
         </div>
       </div>
 
-      <div className="mt-5 relative h-4 w-full rounded-full bg-secondary-soft overflow-hidden">
+      <div className="mt-5 relative w-full rounded-full bg-secondary-soft overflow-hidden" style={{ height: 16 }}>
         <div
-          className="h-full bg-primary rounded-full transition-all duration-700 flex items-center justify-center text-[11px] font-semibold text-primary-foreground"
+          className="h-full bg-primary rounded-full transition-all duration-700 flex items-center justify-center text-[11px] font-semibold text-primary-foreground whitespace-nowrap"
           style={{ width: `${Math.max(progressPct, 8)}%` }}
         >
           {!loadingCampaign && progressPct > 0 && `${progressPct}%`}

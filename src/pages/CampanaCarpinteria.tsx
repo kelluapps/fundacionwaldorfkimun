@@ -252,7 +252,7 @@ const CampanaCarpinteria = () => {
       </section>
 
       {/* MÓDULO DE DONACIÓN (inmediatamente después) */}
-      <section className="px-4 sm:px-5 lg:px-12 mt-5">
+      <section className="px-4 sm:px-6 lg:px-10 mt-5">
         <div className="max-w-3xl mx-auto bg-primary-soft/70 rounded-[28px] shadow-card border border-primary/15 p-5 sm:p-7">
           <h2
             className="font-display text-secondary uppercase tracking-wide flex items-center gap-2"

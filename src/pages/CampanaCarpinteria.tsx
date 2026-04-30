@@ -12,8 +12,9 @@ import {
   Sprout,
   Users,
 } from "lucide-react";
-import logo from "@/assets/logo-kimun.png";
 import heroImg from "@/assets/carpinteria-hero.jpg";
+import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 import {
   Dialog,
   DialogContent,

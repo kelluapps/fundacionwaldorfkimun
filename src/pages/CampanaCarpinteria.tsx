@@ -316,7 +316,7 @@ const CampanaCarpinteria = () => {
       </section>
 
       {/* CONTENIDO ADICIONAL */}
-      <section className="px-4 sm:px-5 lg:px-12 mt-5 pb-10">
+      <section className="px-4 sm:px-6 lg:px-10 mt-5 pb-12 flex-1">
         <div className="max-w-3xl mx-auto bg-card rounded-[28px] shadow-card border border-border/50 p-5 sm:p-7">
           <div className="flex items-center gap-2">
             <Leaf className="w-5 h-5 text-secondary" />

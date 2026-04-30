@@ -416,6 +416,8 @@ const CampanaCarpinteria = () => {
           </form>
         </DialogContent>
       </Dialog>
+
+      <SiteFooter />
     </div>
   );
 };

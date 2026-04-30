@@ -124,25 +124,23 @@ const CampanaCarpinteria = () => {
   };
 
   return (
-    <div className="min-h-screen bg-warm overflow-x-hidden">
-      {/* Mini nav superior (sin logo grande) */}
-      <header className="px-4 sm:px-5 lg:px-12 pt-4 pb-2">
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
+    <div className="min-h-screen bg-warm overflow-x-hidden flex flex-col">
+      <SiteHeader />
+
+      {/* Breadcrumb / volver */}
+      <div className="px-4 sm:px-6 lg:px-10 pt-5 pb-1">
+        <div className="max-w-3xl mx-auto">
           <Link
             to="/campanas"
             className="inline-flex items-center gap-1.5 text-secondary font-hand text-[11px] tracking-widest hover:text-primary transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> CAMPAÑAS
           </Link>
-          <nav className="hidden sm:flex items-center gap-6 font-hand text-[12px] tracking-[0.18em] text-foreground/80">
-            <Link to="/" className="hover:text-primary transition-colors">EL SUEÑO</Link>
-            <Link to="/campanas" className="text-primary border-b-2 border-primary pb-1">CAMPAÑAS</Link>
-          </nav>
         </div>
-      </header>
+      </div>
 
       {/* CONTENEDOR PRINCIPAL: Header + Imagen + Métricas */}
-      <section className="px-4 sm:px-5 lg:px-12 pt-2">
+      <section className="px-4 sm:px-6 lg:px-10 pt-3">
         <div className="max-w-3xl mx-auto bg-card rounded-[28px] shadow-card border border-border/50 overflow-hidden">
           {/* HEADER INTERNO */}
           <div className="p-5 sm:p-7">
@@ -152,24 +150,17 @@ const CampanaCarpinteria = () => {
               CAMPAÑA DEL MES
             </div>
 
-            {/* Logo + Título */}
-            <div className="mt-4 flex items-center gap-4 sm:gap-5">
-              <img
-                src={logo}
-                alt="Waldorf Kimún"
-                className="h-20 sm:h-24 w-auto shrink-0"
-              />
-              <div className="min-w-0 flex-1">
-                <p className="font-display text-secondary uppercase text-xs sm:text-sm tracking-wide leading-tight">
-                  Creemos juntos un
-                </p>
-                <h1
-                  className="font-display text-secondary uppercase tracking-wide leading-[0.95] mt-1"
-                  style={{ fontSize: "clamp(28px, 8vw, 56px)", fontWeight: 700 }}
-                >
-                  Taller de<br />Carpintería
-                </h1>
-              </div>
+            {/* Título */}
+            <div className="mt-4">
+              <p className="font-display text-secondary uppercase text-xs sm:text-sm tracking-wide leading-tight">
+                Creemos juntos un
+              </p>
+              <h1
+                className="font-display text-secondary uppercase tracking-wide leading-[0.95] mt-1"
+                style={{ fontSize: "clamp(28px, 8vw, 56px)", fontWeight: 700 }}
+              >
+                Taller de Carpintería
+              </h1>
             </div>
 
             {/* Subtítulo con hojitas */}

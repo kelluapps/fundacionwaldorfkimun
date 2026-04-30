@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Heart, ArrowRight, Leaf, Users, Globe, HandHeart, Brain, Sparkles, Hand } from "lucide-react";
 import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 import heroImg from "@/assets/home-hero-children.jpg";
 import causaImg from "@/assets/home-causa-carpinteria.jpg";
 import comunidadImg from "@/assets/home-comunidad-circulo.jpg";

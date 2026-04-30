@@ -127,20 +127,8 @@ const CampanaCarpinteria = () => {
     <div className="min-h-screen bg-warm overflow-x-hidden flex flex-col">
       <SiteHeader />
 
-      {/* Breadcrumb / volver */}
-      <div className="px-4 sm:px-6 lg:px-10 pt-5 pb-1">
-        <div className="max-w-3xl mx-auto">
-          <Link
-            to="/campanas"
-            className="inline-flex items-center gap-1.5 text-secondary font-hand text-[11px] tracking-widest hover:text-primary transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" /> CAMPAÑAS
-          </Link>
-        </div>
-      </div>
-
       {/* CONTENEDOR PRINCIPAL: Header + Imagen + Métricas */}
-      <section className="px-4 sm:px-6 lg:px-10 pt-3">
+      <section className="px-4 sm:px-6 lg:px-10 pt-5">
         <div className="max-w-3xl mx-auto bg-card rounded-[28px] shadow-card border border-border/50 overflow-hidden">
           {/* HEADER INTERNO */}
           <div className="p-5 sm:p-7">

@@ -47,12 +47,12 @@ const Index = () => {
                 >
                   <Heart className="w-4 h-4" fill="currentColor" /> DONA AHORA
                 </Link>
-                <a
-                  href="#causa"
-                  className="inline-flex items-center justify-center gap-2 bg-background text-foreground rounded-full px-7 py-3.5 font-hand text-[12px] tracking-[0.2em] hover:bg-background/90 transition-all"
+                <Link
+                  to="/socios"
+                  className="inline-flex items-center justify-center gap-2 bg-background text-foreground rounded-full px-7 py-3.5 font-hand text-[12px] tracking-[0.2em] hover:bg-background/90 transition-all border border-border/60"
                 >
-                  CONOCE NUESTRA CAUSA
-                </a>
+                  <Leaf className="w-4 h-4 text-secondary" strokeWidth={1.8} /> HAZTE SOCIO
+                </Link>
               </div>
             </div>
           </div>

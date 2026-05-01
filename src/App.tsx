@@ -4,8 +4,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
-import Campanas from "./pages/Campanas.tsx";
-import CampanaAnfiteatro from "./pages/CampanaAnfiteatro.tsx";
 import CampanaCarpinteria from "./pages/CampanaCarpinteria.tsx";
 import Arbol from "./pages/Arbol.tsx";
 import Contacto from "./pages/Contacto.tsx";

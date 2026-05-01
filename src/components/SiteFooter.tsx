@@ -2,8 +2,8 @@ import { Link } from "react-router-dom";
 
 const footerLinks = [
   { label: "INICIO", to: "/" },
-  { label: "CAUSA DEL MES", to: "/campanas/carpinteria" },
-  { label: "HACERME SOCIO", to: "/arbol" },
+  { label: "CAUSA DEL MES", to: "/donar" },
+  { label: "HACERME SOCIO", to: "/socios" },
   { label: "CONTACTO", to: "/contacto" },
 ];
 

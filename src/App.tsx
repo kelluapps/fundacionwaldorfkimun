@@ -9,6 +9,7 @@ import CampanaAnfiteatro from "./pages/CampanaAnfiteatro.tsx";
 import CampanaCarpinteria from "./pages/CampanaCarpinteria.tsx";
 import Arbol from "./pages/Arbol.tsx";
 import Contacto from "./pages/Contacto.tsx";
+import Gracias from "./pages/Gracias.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
 
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/arbol" element={<Arbol />} />
           <Route path="/hazte-socio" element={<Arbol />} />
           <Route path="/contacto" element={<Contacto />} />
+          <Route path="/gracias" element={<Gracias />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

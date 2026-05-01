@@ -126,7 +126,7 @@ const Gracias = () => {
       <section className="px-5 sm:px-8 lg:px-12 pb-16">
         <div className="max-w-xl mx-auto flex flex-col items-center gap-4">
           <Link
-            to="/arbol"
+            to="/socios"
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-8 py-3.5 font-hand text-sm tracking-[0.22em] shadow-card hover:bg-primary/90 hover:-translate-y-0.5 transition-all"
           >
             <Heart className="w-4 h-4" fill="currentColor" />

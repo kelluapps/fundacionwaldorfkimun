@@ -42,7 +42,7 @@ const Index = () => {
               </p>
               <div className="mt-7 flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <Link
-                  to="/campanas/carpinteria"
+                  to="/donar"
                   className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-full px-7 py-3.5 font-hand text-[12px] tracking-[0.2em] shadow-soft hover:bg-primary/90 transition-all hover:-translate-y-0.5"
                 >
                   <Heart className="w-4 h-4" fill="currentColor" /> DONA AHORA
@@ -114,7 +114,7 @@ const Index = () => {
               Tu aporte hace posible este sueño.
             </p>
             <Link
-              to="/campanas/carpinteria"
+              to="/donar"
               className="mt-7 inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-7 py-3.5 font-hand text-[12px] tracking-[0.22em] shadow-card hover:bg-primary/90 transition-all hover:-translate-y-0.5"
             >
               VER CAUSA DEL MES <ArrowRight className="w-4 h-4" />
@@ -180,13 +180,13 @@ const Index = () => {
               </p>
               <div className="mt-6 flex flex-col sm:flex-row gap-3">
                 <Link
-                  to="/campanas/carpinteria"
+                  to="/donar"
                   className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-full px-7 py-3.5 font-hand text-[12px] tracking-[0.22em] shadow-card hover:bg-primary/90 transition-all hover:-translate-y-0.5"
                 >
                   <Heart className="w-4 h-4" fill="currentColor" /> DONA AHORA
                 </Link>
                 <Link
-                  to="/arbol"
+                  to="/socios"
                   className="inline-flex items-center justify-center gap-2 bg-background/90 text-foreground rounded-full px-7 py-3.5 font-hand text-[12px] tracking-[0.22em] hover:bg-background transition-all"
                 >
                   🌱 HAZTE SOCIO

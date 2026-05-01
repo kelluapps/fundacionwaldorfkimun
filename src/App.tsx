@@ -1,11 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
-import Campanas from "./pages/Campanas.tsx";
-import CampanaAnfiteatro from "./pages/CampanaAnfiteatro.tsx";
 import CampanaCarpinteria from "./pages/CampanaCarpinteria.tsx";
 import Arbol from "./pages/Arbol.tsx";
 import Contacto from "./pages/Contacto.tsx";
@@ -24,11 +22,14 @@ const App = () => (
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/campanas" element={<Campanas />} />
-          <Route path="/campanas/anfiteatro" element={<CampanaAnfiteatro />} />
-          <Route path="/campanas/carpinteria" element={<CampanaCarpinteria />} />
-          <Route path="/arbol" element={<Arbol />} />
-          <Route path="/hazte-socio" element={<Arbol />} />
+          <Route path="/donar" element={<CampanaCarpinteria />} />
+          <Route path="/socios" element={<Arbol />} />
+          {/* Redirecciones legacy */}
+          <Route path="/campanas" element={<Navigate to="/donar" replace />} />
+          <Route path="/campanas/carpinteria" element={<Navigate to="/donar" replace />} />
+          <Route path="/campanas/anfiteatro" element={<Navigate to="/donar" replace />} />
+          <Route path="/arbol" element={<Navigate to="/socios" replace />} />
+          <Route path="/hazte-socio" element={<Navigate to="/socios" replace />} />
           <Route path="/contacto" element={<Contacto />} />
           <Route path="/gracias" element={<Gracias />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

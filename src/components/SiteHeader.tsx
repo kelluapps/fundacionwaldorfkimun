@@ -5,8 +5,8 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/s
 
 const navItems = [
   { label: "INICIO", to: "/" },
-  { label: "CAUSA DEL MES", to: "/campanas/carpinteria" },
-  { label: "HACERME SOCIO", to: "/arbol" },
+  { label: "CAUSA DEL MES", to: "/donar" },
+  { label: "HACERME SOCIO", to: "/socios" },
   { label: "CONTACTO", to: "/contacto" },
 ];
 
@@ -28,7 +28,7 @@ export default function SiteHeader() {
 
         <div className="flex items-center gap-2">
           <Link
-            to="/campanas/carpinteria"
+            to="/donar"
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-5 sm:px-6 py-2.5 font-hand text-[11px] sm:text-xs tracking-[0.18em] shadow-card hover:bg-primary/90 transition-all hover:-translate-y-0.5"
           >
             <Heart className="w-4 h-4" fill="currentColor" />

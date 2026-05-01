@@ -1,19 +1,16 @@
 import { Menu, Heart } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import logo from "@/assets/logo-kimun.png";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 
 const navItems = [
-  { label: "QUIÉNES SOMOS", href: "/#proposito" },
-  { label: "QUÉ HACEMOS", href: "/#impacto" },
-  { label: "CAUSA DEL MES", href: "/#causa" },
-  { label: "TRANSPARENCIA", href: "/#valores" },
+  { label: "INICIO", to: "/" },
+  { label: "CAUSA DEL MES", to: "/campanas/carpinteria" },
+  { label: "HACERME SOCIO", to: "/arbol" },
+  { label: "CONTACTO", to: "/contacto" },
 ];
 
 export default function SiteHeader() {
-  const { pathname } = useLocation();
-  const isHome = pathname === "/";
-
   return (
     <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border/40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex items-center justify-between gap-3">
@@ -23,9 +20,9 @@ export default function SiteHeader() {
 
         <nav className="hidden lg:flex items-center gap-7 font-hand text-[12px] tracking-[0.18em] text-foreground/80">
           {navItems.map((n) => (
-            <a key={n.href} href={isHome ? n.href.replace("/#", "#") : n.href} className="hover:text-primary transition-colors">
+            <Link key={n.to} to={n.to} className="hover:text-primary transition-colors">
               {n.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -46,12 +43,12 @@ export default function SiteHeader() {
               <SheetContent side="right" className="bg-background border-border">
                 <nav className="flex flex-col gap-5 mt-12 font-hand text-base tracking-wider text-foreground">
                   {navItems.map((n) => (
-                    <a key={n.href} href={n.href} className="hover:text-primary transition-colors">
-                      {n.label}
-                    </a>
+                    <SheetClose asChild key={n.to}>
+                      <Link to={n.to} className="hover:text-primary transition-colors">
+                        {n.label}
+                      </Link>
+                    </SheetClose>
                   ))}
-                  <Link to="/arbol" className="hover:text-primary transition-colors">HACERME SOCIO</Link>
-                  <Link to="/campanas" className="hover:text-primary transition-colors">CAMPAÑAS</Link>
                 </nav>
               </SheetContent>
             </Sheet>

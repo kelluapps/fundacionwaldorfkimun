@@ -8,7 +8,9 @@ import Campanas from "./pages/Campanas.tsx";
 import CampanaAnfiteatro from "./pages/CampanaAnfiteatro.tsx";
 import CampanaCarpinteria from "./pages/CampanaCarpinteria.tsx";
 import Arbol from "./pages/Arbol.tsx";
+import Contacto from "./pages/Contacto.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import ScrollToTop from "./components/ScrollToTop.tsx";
 
 const queryClient = new QueryClient();
 
@@ -18,12 +20,15 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/campanas" element={<Campanas />} />
           <Route path="/campanas/anfiteatro" element={<CampanaAnfiteatro />} />
           <Route path="/campanas/carpinteria" element={<CampanaCarpinteria />} />
           <Route path="/arbol" element={<Arbol />} />
+          <Route path="/hazte-socio" element={<Arbol />} />
+          <Route path="/contacto" element={<Contacto />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

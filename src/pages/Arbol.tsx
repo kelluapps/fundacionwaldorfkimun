@@ -15,6 +15,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 
 type Tier = {
   key: string;
@@ -111,6 +112,7 @@ const Arbol = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <SiteFooter />
     </div>
   );
 };

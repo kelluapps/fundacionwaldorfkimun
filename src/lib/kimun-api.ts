@@ -40,3 +40,51 @@ export async function createDonation(input: DonateInput): Promise<{ redirectUrl:
 }
 
 export const formatCLP = (n: number) => "$" + (n ?? 0).toLocaleString("es-CL");
+
+const ADMIN_TOKEN_KEY = "kimun.adminToken";
+
+export function getAdminToken(): string {
+  if (typeof window === "undefined") return "";
+  return sessionStorage.getItem(ADMIN_TOKEN_KEY) ?? "";
+}
+
+export function setAdminToken(token: string) {
+  if (typeof window === "undefined") return;
+  if (token) sessionStorage.setItem(ADMIN_TOKEN_KEY, token);
+  else sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+}
+
+export type SaveCampaignResult =
+  | { ok: true }
+  | { ok: false; reason: "unauthorized" | "network" | "server"; message: string };
+
+export async function putCampaign(
+  campaignId: string,
+  body: Record<string, unknown>,
+  token: string,
+): Promise<SaveCampaignResult> {
+  if (!token) {
+    return { ok: false, reason: "unauthorized", message: "Token de administrador incorrecto" };
+  }
+  try {
+    const res = await fetch(`${KIMUN_API_BASE}/campaigns/${encodeURIComponent(campaignId)}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+    if (res.status === 401 || res.status === 403) {
+      return { ok: false, reason: "unauthorized", message: "Token de administrador incorrecto" };
+    }
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      return { ok: false, reason: "server", message: `Error ${res.status}: ${text || "desconocido"}` };
+    }
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: "network", message: "No pudimos conectar con el Worker" };
+  }
+}
+

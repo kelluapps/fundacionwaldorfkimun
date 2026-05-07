@@ -15,6 +15,10 @@ import AdminCampanaEdit from "./pages/AdminCampanaEdit.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
 import AdminApi from "./pages/AdminApi.tsx";
 import AdminPreview from "./pages/AdminPreview.tsx";
+import AdminDonaciones from "./pages/AdminDonaciones.tsx";
+import AdminDonantes from "./pages/AdminDonantes.tsx";
+import AdminSocios from "./pages/AdminSocios.tsx";
+import AdminSociosControl from "./pages/AdminSociosControl.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
 
@@ -46,6 +50,10 @@ const App = () => (
           <Route path="/admin/campanas" element={<AdminCampanas />} />
           <Route path="/admin/campanas/:id" element={<AdminCampanaEdit />} />
           <Route path="/admin/preview" element={<AdminPreview />} />
+          <Route path="/admin/donaciones" element={<AdminDonaciones />} />
+          <Route path="/admin/donantes" element={<AdminDonantes />} />
+          <Route path="/admin/socios" element={<AdminSocios />} />
+          <Route path="/admin/socios-control" element={<AdminSociosControl />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

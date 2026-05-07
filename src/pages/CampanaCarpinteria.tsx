@@ -30,8 +30,6 @@ const CampanaCarpinteria = () => {
   const campaign = useActiveCampaign();
   const [units, setUnits] = useState(1);
   const [openCheckout, setOpenCheckout] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
 
   const [remoteRaised, setRemoteRaised] = useState<number | null>(null);
   const [loadingRemote, setLoadingRemote] = useState(true);

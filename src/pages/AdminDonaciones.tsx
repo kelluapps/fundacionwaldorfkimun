@@ -1,13 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
-import AdminTokenBar from "@/components/admin/AdminTokenBar";
-import { fetchAdminDonations, formatCLP, getAdminToken, MOCK_DONATIONS, type AdminDonation } from "@/lib/kimun-api";
+import { fetchAdminDonations, formatCLP, MOCK_DONATIONS, type AdminDonation } from "@/lib/kimun-api";
 import { Loader2, Search } from "lucide-react";
 
 const MESES = ["Todos", "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
 export default function AdminDonaciones() {
-  const [token, setToken] = useState(getAdminToken());
   const [items, setItems] = useState<AdminDonation[]>([]);
   const [loading, setLoading] = useState(false);
   const [note, setNote] = useState<string | null>(null);

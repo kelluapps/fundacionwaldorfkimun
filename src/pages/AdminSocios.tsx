@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
-import AdminTokenBar from "@/components/admin/AdminTokenBar";
-import { fetchAdminSocios, formatCLP, getAdminToken, MOCK_SOCIOS, type AdminSocio } from "@/lib/kimun-api";
+import { fetchAdminSocios, formatCLP, MOCK_SOCIOS, type AdminSocio } from "@/lib/kimun-api";
 import { LoadingBox, Notice } from "./AdminDonaciones";
 
 const MESES = ["Todos", "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];

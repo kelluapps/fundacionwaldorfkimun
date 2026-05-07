@@ -79,18 +79,24 @@ const DonationModal = ({ open, onOpenChange, campaign, units }: Props) => {
     }
   };
 
-  const handleYesSocio = () => {
-    // Pasar datos precargados a /socios via sessionStorage
+  const handleYesSocio = async () => {
+    setError(null);
+    setLoading(true);
     try {
-      sessionStorage.setItem(
-        "kimun_socio_prefill",
-        JSON.stringify({ name: name.trim(), email: email.trim(), phone: phone.trim() }),
-      );
+      const { redirectUrl } = await createSocio({
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim() || undefined,
+        comment: "Suscripción creada desde upsell de campaña",
+        amount: total,
+        campaignId: remoteId,
+      });
+      if (!redirectUrl) throw new Error("missing redirectUrl");
+      window.location.href = redirectUrl;
     } catch {
-      // ignore
+      setLoading(false);
+      setError("No pudimos iniciar tu aporte mensual. Inténtalo nuevamente.");
     }
-    onOpenChange(false);
-    navigate(upsellAction);
   };
 
   return (

@@ -3,22 +3,68 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import AdminNav from "@/components/admin/AdminNav";
 import { useCampaigns } from "@/lib/campaigns";
-import { fetchCampaigns, formatCLP, type KimunCampaign } from "@/lib/kimun-api";
-import { useEffect, useState } from "react";
-import { Cloud, Palette, Eye, ArrowRight } from "lucide-react";
+import {
+  fetchCampaigns,
+  fetchAdminDonations,
+  fetchAdminSocios,
+  formatCLP,
+  getAdminToken,
+  MOCK_DONATIONS,
+  MOCK_SOCIOS,
+  type AdminDonation,
+  type AdminSocio,
+  type KimunCampaign,
+} from "@/lib/kimun-api";
+import { useEffect, useMemo, useState } from "react";
+import { Cloud, Palette, Eye, ArrowRight, HandCoins, Users, UserCheck, CalendarRange } from "lucide-react";
 
 export default function AdminDashboard() {
   const local = useCampaigns();
   const [remote, setRemote] = useState<KimunCampaign[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [donations, setDonations] = useState<AdminDonation[]>([]);
+  const [socios, setSocios] = useState<AdminSocio[]>([]);
 
   useEffect(() => {
-    fetchCampaigns()
-      .then(setRemote)
-      .catch(() => setErr("No pudimos conectar con el Worker"));
+    fetchCampaigns().then(setRemote).catch(() => setErr("No pudimos conectar con el Worker"));
+    const token = getAdminToken();
+    fetchAdminDonations(token).then((r) => setDonations(r.ok && r.items.length ? r.items : MOCK_DONATIONS));
+    fetchAdminSocios(token).then((r) => setSocios(r.ok && r.items.length ? r.items : MOCK_SOCIOS));
   }, []);
 
   const active = local.find((c) => c.active);
+
+  const summary = useMemo(() => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = now.getMonth();
+    const dYear = donations.filter((d) => new Date(d.date).getFullYear() === y);
+    const dMonth = dYear.filter((d) => new Date(d.date).getMonth() === m);
+    const seenBefore = new Set<string>();
+    donations.forEach((d) => {
+      const dt = new Date(d.date);
+      if (dt < new Date(y, m, 1)) seenBefore.add(d.email.toLowerCase());
+    });
+    const newDonors = new Set(dMonth.map((d) => d.email.toLowerCase()));
+    seenBefore.forEach((e) => newDonors.delete(e));
+    const totalDonors = new Set(donations.map((d) => d.email.toLowerCase())).size;
+    const sociosActivos = socios.filter((s) => (s.status ?? "").toLowerCase() === "activo");
+    const sociosNuevosMes = socios.filter((s) => {
+      const dt = new Date(s.date);
+      return dt.getFullYear() === y && dt.getMonth() === m;
+    }).length;
+    const monthlyCommit = sociosActivos.reduce((a, s) => a + s.amount, 0);
+    return {
+      raisedYear: dYear.reduce((a, d) => a + d.amount, 0),
+      donationsMonth: dMonth.length,
+      totalDonors,
+      newDonorsMonth: newDonors.size,
+      sociosActivos: sociosActivos.length,
+      monthlyCommit,
+      sociosNuevosMes,
+    };
+  }, [donations, socios]);
+
 
   return (
     <div className="min-h-screen bg-warm flex flex-col">
@@ -35,10 +81,27 @@ export default function AdminDashboard() {
             <Stat label="Causa activa" value={active?.title ?? "—"} small />
           </div>
 
-          <div className="grid sm:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+            <Stat label="Recaudado este año" value={formatCLP(summary.raisedYear)} small />
+            <Stat label="Donaciones este mes" value={String(summary.donationsMonth)} />
+            <Stat label="Donantes totales" value={String(summary.totalDonors)} />
+            <Stat label="Donantes nuevos este mes" value={String(summary.newDonorsMonth)} />
+            <Stat label="Socios activos" value={String(summary.sociosActivos)} />
+            <Stat label="Mensual comprometido" value={formatCLP(summary.monthlyCommit)} small />
+            <Stat label="Socios nuevos este mes" value={String(summary.sociosNuevosMes)} />
+            <Stat label="Causa activa" value={active?.title ?? "—"} small />
+          </div>
+
+          <div className="grid sm:grid-cols-3 gap-4 mb-4">
             <Card to="/admin/api" Icon={Cloud} title="Crear en API" desc="Crea campañas reales en el Worker con tu token." />
             <Card to="/admin/campanas" Icon={Palette} title="Editar visual" desc="Diseña cómo se ve la campaña pública." />
             <Card to="/admin/preview" Icon={Eye} title="Vista previa" desc="Mira /donar tal como lo verá la gente." />
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card to="/admin/donaciones" Icon={HandCoins} title="Donaciones" desc="Últimas donaciones recibidas." />
+            <Card to="/admin/donantes" Icon={Users} title="Donantes" desc="Control mensual por donante." />
+            <Card to="/admin/socios" Icon={UserCheck} title="Socios" desc="Listado de socios mensuales." />
+            <Card to="/admin/socios-control" Icon={CalendarRange} title="Control socios" desc="Seguimiento mensual anual." />
           </div>
 
           {active && (

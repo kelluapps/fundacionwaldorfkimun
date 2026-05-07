@@ -78,6 +78,93 @@ export function setAdminToken(token: string) {
   else sessionStorage.removeItem(ADMIN_TOKEN_KEY);
 }
 
+// =============================================================
+// Admin: donaciones y socios
+// =============================================================
+
+export type AdminDonation = {
+  id?: string;
+  date: string; // ISO
+  name: string;
+  email: string;
+  amount: number;
+  campaignId?: string;
+  campaignTitle?: string;
+  status?: string;
+};
+
+export type AdminSocio = {
+  id?: string;
+  subscriptionId?: string;
+  date: string; // ISO inscripción
+  name: string;
+  email: string;
+  phone?: string;
+  amount: number;
+  plan?: string;
+  status?: string;
+  comment?: string;
+  /** Pagos por mes del año actual: { "2026-01": 5000, ... } */
+  monthlyPayments?: Record<string, number | "paid" | "pending" | "failed" | "canceled">;
+};
+
+export type AdminFetchResult<T> = {
+  ok: boolean;
+  items: T[];
+  reason?: "unauthorized" | "network" | "server" | "missing";
+  message?: string;
+};
+
+async function adminGet<T>(path: string, token: string): Promise<AdminFetchResult<T>> {
+  if (!token) {
+    return { ok: false, items: [], reason: "unauthorized", message: "Token de administrador incorrecto" };
+  }
+  try {
+    const res = await fetch(`${KIMUN_API_BASE}${path}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.status === 401 || res.status === 403) {
+      return { ok: false, items: [], reason: "unauthorized", message: "Token de administrador incorrecto" };
+    }
+    if (res.status === 404) {
+      return { ok: false, items: [], reason: "missing", message: "Endpoint pendiente de conectar en Worker" };
+    }
+    if (!res.ok) {
+      return { ok: false, items: [], reason: "server", message: `Error ${res.status}` };
+    }
+    const data = await res.json();
+    const items = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
+    return { ok: true, items: items as T[] };
+  } catch {
+    return { ok: false, items: [], reason: "network", message: "No pudimos conectar con el Worker" };
+  }
+}
+
+export const fetchAdminDonations = (token: string) => adminGet<AdminDonation>("/admin/donations", token);
+export const fetchAdminDonantes = (token: string) => adminGet<AdminDonation>("/admin/donantes", token);
+export const fetchAdminSocios = (token: string) => adminGet<AdminSocio>("/admin/socios", token);
+export const fetchAdminSociosControl = (token: string) => adminGet<AdminSocio>("/admin/socios-control", token);
+
+// =============================================================
+// Mocks de respaldo cuando los endpoints aún no existen
+// =============================================================
+
+export const MOCK_DONATIONS: AdminDonation[] = [
+  { id: "d_001", date: "2026-05-02T10:30:00Z", name: "Jorge Aguirre", email: "jorge@ejemplo.cl", amount: 5000, campaignId: "taller-carpinteria", campaignTitle: "Taller de Carpintería", status: "paid" },
+  { id: "d_002", date: "2026-05-01T15:12:00Z", name: "María Pérez", email: "maria@ejemplo.cl", amount: 10000, campaignId: "taller-carpinteria", campaignTitle: "Taller de Carpintería", status: "paid" },
+  { id: "d_003", date: "2026-04-22T09:05:00Z", name: "Jorge Aguirre", email: "jorge@ejemplo.cl", amount: 10000, campaignId: "arboles", campaignTitle: "Árboles", status: "paid" },
+  { id: "d_004", date: "2026-03-10T18:40:00Z", name: "Camila Soto", email: "camila@ejemplo.cl", amount: 20000, campaignId: "taller-carpinteria", campaignTitle: "Taller de Carpintería", status: "pending" },
+  { id: "d_005", date: "2026-02-14T12:00:00Z", name: "Pedro Núñez", email: "pedro@ejemplo.cl", amount: 5000, campaignId: "arboles", campaignTitle: "Árboles", status: "paid" },
+  { id: "d_006", date: "2026-01-20T20:00:00Z", name: "María Pérez", email: "maria@ejemplo.cl", amount: 5000, campaignId: "taller-carpinteria", campaignTitle: "Taller de Carpintería", status: "paid" },
+];
+
+export const MOCK_SOCIOS: AdminSocio[] = [
+  { id: "s_001", subscriptionId: "sub_aaa", date: "2026-01-10T10:00:00Z", name: "Ana Rivera", email: "ana@ejemplo.cl", phone: "+56 9 1234 5678", amount: 5000, plan: "Brote", status: "activo", monthlyPayments: { "2026-01": "paid", "2026-02": "paid", "2026-03": "paid", "2026-04": "paid", "2026-05": "pending" } },
+  { id: "s_002", subscriptionId: "sub_bbb", date: "2026-02-04T11:00:00Z", name: "Luis Fuentes", email: "luis@ejemplo.cl", phone: "+56 9 8765 4321", amount: 10000, plan: "Tronco", status: "activo", monthlyPayments: { "2026-02": "paid", "2026-03": "paid", "2026-04": "paid", "2026-05": "paid" } },
+  { id: "s_003", subscriptionId: "sub_ccc", date: "2026-03-15T09:30:00Z", name: "Sofía Lagos", email: "sofia@ejemplo.cl", phone: "+56 9 4444 3333", amount: 20000, plan: "Copa", status: "activo", monthlyPayments: { "2026-03": "paid", "2026-04": "paid", "2026-05": "paid" } },
+  { id: "s_004", subscriptionId: "sub_ddd", date: "2025-11-01T08:00:00Z", name: "Diego Vargas", email: "diego@ejemplo.cl", phone: "+56 9 5555 6666", amount: 5000, plan: "Brote", status: "cancelado", monthlyPayments: { "2026-01": "paid", "2026-02": "canceled" } },
+];
+
 export type SaveCampaignResult =
   | { ok: true }
   | { ok: false; reason: "unauthorized" | "network" | "server"; message: string };

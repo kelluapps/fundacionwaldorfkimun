@@ -23,6 +23,7 @@ type Tier = {
   name: string;
   description: string;
   price: string;
+  amount: number;
   cta: string;
   image: string;
   tint: string;
@@ -30,11 +31,11 @@ type Tier = {
 };
 
 const tiers: Tier[] = [
-  { key: "semilla", name: "SEMILLA", description: "Todo gran sueño comienza con una semilla.", price: "$5.000", cta: "SER SEMILLA", image: seedImg, tint: "bg-tier-seed", buttonVariant: "ghost" },
-  { key: "brote", name: "BROTE", description: "Damos los primeros pasos y algo comienza a crecer.", price: "$10.000", cta: "SER BROTE", image: sproutImg, tint: "bg-tier-sprout", buttonVariant: "soft" },
-  { key: "rama", name: "RAMA", description: "Nos expandimos y fortalecemos este sueño juntos.", price: "$15.000", cta: "SER RAMA", image: branchImg, tint: "bg-tier-branch", buttonVariant: "soft" },
-  { key: "hoja", name: "HOJA", description: "Damos vida, energía y color a este proyecto.", price: "$20.000", cta: "SER HOJA", image: leafImg, tint: "bg-tier-leaf", buttonVariant: "soft" },
-  { key: "fruto", name: "FRUTO", description: "El fruto es el impacto que dejamos en la comunidad.", price: "$25.000+", cta: "SER FRUTO", image: fruitImg, tint: "bg-tier-fruit", buttonVariant: "solid" },
+  { key: "semilla", name: "SEMILLA", description: "Todo gran sueño comienza con una semilla.", price: "$5.000", amount: 5000, cta: "QUIERO SER SOCIO", image: seedImg, tint: "bg-tier-seed", buttonVariant: "ghost" },
+  { key: "brote", name: "BROTE", description: "Damos los primeros pasos y algo comienza a crecer.", price: "$10.000", amount: 10000, cta: "QUIERO SER SOCIO", image: sproutImg, tint: "bg-tier-sprout", buttonVariant: "soft" },
+  { key: "rama", name: "RAMA", description: "Nos expandimos y fortalecemos este sueño juntos.", price: "$15.000", amount: 15000, cta: "QUIERO SER SOCIO", image: branchImg, tint: "bg-tier-branch", buttonVariant: "soft" },
+  { key: "hoja", name: "HOJA", description: "Damos vida, energía y color a este proyecto.", price: "$20.000", amount: 20000, cta: "QUIERO SER SOCIO", image: leafImg, tint: "bg-tier-leaf", buttonVariant: "soft" },
+  { key: "fruto", name: "FRUTO", description: "El fruto es el impacto que dejamos en la comunidad.", price: "$25.000+", amount: 25000, cta: "QUIERO SER SOCIO", image: fruitImg, tint: "bg-tier-fruit", buttonVariant: "solid" },
 ];
 
 const TierButton = ({ variant, children, onClick }: { variant: Tier["buttonVariant"]; children: React.ReactNode; onClick: () => void }) => {

@@ -11,7 +11,7 @@ import {
   type Campaign,
   type CampaignIconKey,
 } from "@/lib/campaigns";
-import { formatCLP } from "@/lib/kimun-api";
+import { formatCLP, fetchCampaigns, type KimunCampaign } from "@/lib/kimun-api";
 import {
   Dialog,
   DialogContent,
@@ -26,10 +26,29 @@ export default function AdminCampanaEdit() {
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
 
+  const [remoteItems, setRemoteItems] = useState<KimunCampaign[]>([]);
+  const [remoteLoading, setRemoteLoading] = useState(true);
+  const [remoteError, setRemoteError] = useState<string | null>(null);
+
   useEffect(() => {
     const found = loadCampaigns().find((c) => c.id === id) ?? null;
     setCampaign(found);
   }, [id]);
+
+  useEffect(() => {
+    const ctrl = new AbortController();
+    setRemoteLoading(true);
+    fetchCampaigns(ctrl.signal)
+      .then((items) => {
+        setRemoteItems(items);
+        setRemoteError(null);
+      })
+      .catch((e) => {
+        if (e?.name !== "AbortError") setRemoteError("No hay causas disponibles en la API");
+      })
+      .finally(() => setRemoteLoading(false));
+    return () => ctrl.abort();
+  }, []);
 
   const set = <K extends keyof Campaign>(k: K, v: Campaign[K]) =>
     setCampaign((c) => (c ? { ...c, [k]: v } : c));
@@ -92,6 +111,54 @@ export default function AdminCampanaEdit() {
           </div>
 
           <div className="mt-6 grid gap-6">
+            <Block title="Conexión con la API">
+              <Field label="Selecciona tu causa (campaña real en el Worker)">
+                {remoteLoading ? (
+                  <p className="text-xs text-foreground/60">Cargando causas desde la API…</p>
+                ) : remoteError ? (
+                  <p className="text-xs text-destructive">{remoteError}. Puedes seguir editando en modo local.</p>
+                ) : remoteItems.length === 0 ? (
+                  <p className="text-xs text-destructive">No hay causas disponibles en la API</p>
+                ) : (
+                  <select
+                    value={campaign.remoteCampaignId ?? ""}
+                    onChange={(e) => {
+                      const rid = e.target.value;
+                      const found = remoteItems.find((x) => x.id === rid);
+                      setCampaign((c) =>
+                        c
+                          ? {
+                              ...c,
+                              remoteCampaignId: rid || undefined,
+                              ...(found
+                                ? {
+                                    title: c.title || found.title,
+                                    goal: c.goal || found.goal,
+                                    raised: found.raised,
+                                  }
+                                : {}),
+                            }
+                          : c,
+                      );
+                    }}
+                    className="w-full rounded-full border border-border bg-background px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
+                  >
+                    <option value="">— Sin conectar —</option>
+                    {remoteItems.map((it) => (
+                      <option key={it.id} value={it.id}>
+                        {it.title} ({it.id})
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {campaign.remoteCampaignId && (
+                  <p className="text-[11px] text-foreground/60 mt-2">
+                    Conectada a <code className="font-mono">{campaign.remoteCampaignId}</code>. Las donaciones usarán este ID en el Worker.
+                  </p>
+                )}
+              </Field>
+            </Block>
+
             <Block title="Datos generales">
               <Field label="Nombre de la campaña">
                 <Input value={campaign.title} onChange={(v) => set("title", v)} />

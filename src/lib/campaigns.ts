@@ -64,6 +64,8 @@ export type Campaign = {
   unitIcon: CampaignIconKey;
   imageUrl: string;
   videoUrl?: string;
+  /** ID real de la campaña en el Worker (API externa). Si está presente, se usa para fetch + donación. */
+  remoteCampaignId?: string;
   updatedAt: string;
 };
 
@@ -89,6 +91,7 @@ const defaultSeed = (): Campaign[] => [
     unitIcon: "hammer",
     imageUrl: "",
     videoUrl: "",
+    remoteCampaignId: "taller-carpinteria",
     updatedAt: new Date().toISOString(),
   },
 ];

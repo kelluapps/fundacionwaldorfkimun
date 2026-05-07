@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2, Sprout, Lock, ArrowLeft } from "lucide-react";
 import { createDonation, createSocio, formatCLP } from "@/lib/kimun-api";
-import { type Campaign } from "@/lib/campaigns";
+import { DEFAULT_UPSELL, type Campaign } from "@/lib/campaigns";
 
 type Props = {
   open: boolean;

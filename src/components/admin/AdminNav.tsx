@@ -1,11 +1,15 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Cloud, Palette, Eye } from "lucide-react";
+import { LayoutDashboard, Cloud, Palette, Eye, HandCoins, Users, UserCheck, CalendarRange } from "lucide-react";
 
 const items = [
   { to: "/admin", label: "Dashboard", Icon: LayoutDashboard, end: true },
   { to: "/admin/api", label: "API", Icon: Cloud },
   { to: "/admin/campanas", label: "Campañas", Icon: Palette },
   { to: "/admin/preview", label: "Vista previa", Icon: Eye },
+  { to: "/admin/donaciones", label: "Donaciones", Icon: HandCoins },
+  { to: "/admin/donantes", label: "Donantes", Icon: Users },
+  { to: "/admin/socios", label: "Socios", Icon: UserCheck },
+  { to: "/admin/socios-control", label: "Control socios", Icon: CalendarRange },
 ];
 
 export default function AdminNav() {

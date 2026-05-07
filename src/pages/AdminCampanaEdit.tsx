@@ -87,8 +87,8 @@ function AdminCampanaEditInner() {
 
   const handlePublish = () => {
     handleSave();
-    setActiveCampaign(slugify(campaign.id || campaign.title));
-    alert("Campaña publicada como activa");
+    setMainCampaign(slugify(campaign.id || campaign.title));
+    alert("Campaña publicada como principal (causa del mes)");
   };
 
   return (

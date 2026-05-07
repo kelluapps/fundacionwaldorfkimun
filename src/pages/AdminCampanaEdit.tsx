@@ -332,3 +332,11 @@ function Input({
     />
   );
 }
+
+export default function AdminCampanaEdit() {
+  return (
+    <AdminGuard>
+      <AdminCampanaEditInner />
+    </AdminGuard>
+  );
+}

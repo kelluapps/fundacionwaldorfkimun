@@ -347,62 +347,12 @@ const CampanaCarpinteria = () => {
         </div>
       </section>
 
-      <Dialog open={openCheckout} onOpenChange={setOpenCheckout}>
-        <DialogContent className="bg-card border-border max-w-md rounded-3xl">
-          <DialogHeader>
-            <DialogTitle className="font-display text-2xl text-secondary text-center leading-tight">
-              Estás a un paso de donar tus {campaign.unitPlural} solidarios
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
-            <div className="bg-secondary-soft rounded-2xl p-4 text-sm">
-              <div className="flex justify-between">
-                <span className="text-foreground/70 capitalize">{campaign.unitPlural}</span>
-                <span className="font-semibold text-foreground">{units}</span>
-              </div>
-              <div className="flex justify-between mt-1">
-                <span className="text-foreground/70">Total a donar</span>
-                <span className="font-display text-primary text-xl">{formatCLP(total)}</span>
-              </div>
-            </div>
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="font-hand text-xs tracking-widest text-foreground/70">NOMBRE</span>
-              <input
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="rounded-full border border-border bg-background px-4 py-2.5 outline-none focus:border-primary"
-                placeholder="Tu nombre"
-              />
-            </label>
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="font-hand text-xs tracking-widest text-foreground/70">EMAIL</span>
-              <input
-                required
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="rounded-full border border-border bg-background px-4 py-2.5 outline-none focus:border-primary"
-                placeholder="tu@email.com"
-              />
-            </label>
-            {donateError && (
-              <p className="text-xs text-destructive text-center">{donateError}</p>
-            )}
-            <button
-              type="submit"
-              disabled={donating}
-              className="mt-2 bg-primary text-primary-foreground rounded-full py-3.5 font-hand text-sm tracking-[0.22em] shadow-card hover:bg-primary/90 transition-all disabled:opacity-60 disabled:cursor-wait inline-flex items-center justify-center gap-2"
-            >
-              {donating && <Loader2 className="w-4 h-4 animate-spin" />}
-              {donating ? "REDIRIGIENDO…" : "CONTINUAR AL PAGO"}
-            </button>
-            <p className="text-[11px] text-foreground/60 text-center inline-flex items-center justify-center gap-1.5">
-              <Lock className="w-3 h-3" /> Pago seguro procesado por Flow
-            </p>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <DonationModal
+        open={openCheckout}
+        onOpenChange={setOpenCheckout}
+        campaign={campaign}
+        units={units}
+      />
 
       <SiteFooter />
     </div>

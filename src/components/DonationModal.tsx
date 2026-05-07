@@ -21,7 +21,7 @@ type Props = {
 const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const DonationModal = ({ open, onOpenChange, campaign, units }: Props) => {
-  const navigate = useNavigate();
+  
   const [step, setStep] = useState<1 | 2>(1);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");

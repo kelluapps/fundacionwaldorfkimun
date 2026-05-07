@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import CampanaCarpinteria from "./pages/CampanaCarpinteria.tsx";
+import CampanasPublic from "./pages/CampanasPublic.tsx";
 import Arbol from "./pages/Arbol.tsx";
 import Contacto from "./pages/Contacto.tsx";
 import Gracias from "./pages/Gracias.tsx";
@@ -30,8 +31,9 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/donar" element={<CampanaCarpinteria />} />
           <Route path="/socios" element={<Arbol />} />
+          <Route path="/campanas" element={<CampanasPublic />} />
+          <Route path="/campanas/:id" element={<CampanaCarpinteria />} />
           {/* Redirecciones legacy */}
-          <Route path="/campanas" element={<Navigate to="/donar" replace />} />
           <Route path="/campanas/carpinteria" element={<Navigate to="/donar" replace />} />
           <Route path="/campanas/anfiteatro" element={<Navigate to="/donar" replace />} />
           <Route path="/arbol" element={<Navigate to="/socios" replace />} />

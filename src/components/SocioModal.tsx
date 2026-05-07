@@ -38,6 +38,19 @@ const SocioModal = ({ open, onOpenChange, plan }: Props) => {
     if (!open) {
       setError(null);
       setLoading(false);
+      return;
+    }
+    try {
+      const raw = sessionStorage.getItem("kimun_socio_prefill");
+      if (raw) {
+        const data = JSON.parse(raw);
+        if (data?.name) setName(data.name);
+        if (data?.email) setEmail(data.email);
+        if (data?.phone) setPhone(data.phone);
+        sessionStorage.removeItem("kimun_socio_prefill");
+      }
+    } catch {
+      // ignore
     }
   }, [open]);
 

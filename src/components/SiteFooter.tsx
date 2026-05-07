@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 const footerLinks = [
   { label: "INICIO", to: "/" },
   { label: "CAUSA DEL MES", to: "/donar" },
+  { label: "CAMPAÑAS", to: "/campanas" },
   { label: "HACERME SOCIO", to: "/socios" },
   { label: "CONTACTO", to: "/contacto" },
 ];

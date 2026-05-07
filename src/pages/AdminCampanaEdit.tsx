@@ -6,12 +6,14 @@ import AdminGuard from "@/components/admin/AdminGuard";
 import {
   loadCampaigns,
   upsertCampaign,
-  setActiveCampaign,
+  setMainCampaign,
+  getStatus,
   ICON_REGISTRY,
   slugify,
   DEFAULT_UPSELL,
   type Campaign,
   type CampaignIconKey,
+  type CampaignStatus,
 } from "@/lib/campaigns";
 import { formatCLP, fetchCampaigns, type KimunCampaign } from "@/lib/kimun-api";
 import {

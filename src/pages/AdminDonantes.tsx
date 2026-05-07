@@ -67,8 +67,6 @@ export default function AdminDonantes() {
 
   return (
     <AdminShell title="Base de datos de donantes" description="Control mensual de donaciones por donante.">
-      <AdminTokenBar onChange={setToken} />
-
       <div className="bg-card rounded-2xl border border-border/50 shadow-card p-4 mb-4 flex flex-wrap gap-2 items-center">
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar donante…" className="flex-1 min-w-[180px] text-xs rounded-full border border-border bg-background px-3 py-2 focus:outline-none focus:border-primary" />
         <label className="text-[11px] font-hand tracking-[0.18em] text-foreground/60">AÑO</label>

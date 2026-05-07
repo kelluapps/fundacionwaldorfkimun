@@ -1,8 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 import {
-  ArrowLeft,
-  Hammer,
   Heart,
   Leaf,
   Loader2,
@@ -21,15 +18,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  HAMMER_PRICE,
-  formatCLP,
-  fetchCampaigns,
-  createDonation,
-  type KimunCampaign,
-} from "@/lib/kimun-api";
-
-const CAMPAIGN_ID = "taller-carpinteria";
+import { formatCLP, fetchCampaigns, createDonation } from "@/lib/kimun-api";
+import { useActiveCampaign, ICON_REGISTRY } from "@/lib/campaigns";
 
 const Leaflet = ({ className = "" }: { className?: string }) => (
   <svg viewBox="0 0 60 24" className={className} aria-hidden="true">
@@ -42,39 +32,44 @@ const Leaflet = ({ className = "" }: { className?: string }) => (
 );
 
 const CampanaCarpinteria = () => {
-  const [hammers, setHammers] = useState(1);
+  const campaign = useActiveCampaign();
+  const [units, setUnits] = useState(1);
   const [openCheckout, setOpenCheckout] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
-  const [campaign, setCampaign] = useState<KimunCampaign | null>(null);
-  const [loadingCampaign, setLoadingCampaign] = useState(true);
-  const [campaignError, setCampaignError] = useState<string | null>(null);
+  const [remoteRaised, setRemoteRaised] = useState<number | null>(null);
+  const [loadingRemote, setLoadingRemote] = useState(true);
 
   const [donating, setDonating] = useState(false);
   const [donateError, setDonateError] = useState<string | null>(null);
 
-  const loadCampaign = (signal?: AbortSignal) =>
+  const UnitIcon = useMemo(
+    () => (campaign ? ICON_REGISTRY[campaign.unitIcon]?.Icon ?? ICON_REGISTRY.heart.Icon : ICON_REGISTRY.heart.Icon),
+    [campaign],
+  );
+
+  const loadRemote = (signal?: AbortSignal) =>
     fetchCampaigns(signal)
       .then((items) => {
-        const found = items.find((c) => c.id === CAMPAIGN_ID) ?? items[0] ?? null;
-        if (!found) throw new Error("Sin desafíos");
-        setCampaign(found);
-        setCampaignError(null);
+        if (!campaign) return;
+        const found = items.find((c) => c.id === campaign.id);
+        setRemoteRaised(found?.raised ?? campaign.raised);
       })
-      .catch((e: any) => {
-        if (e?.name !== "AbortError")
-          setCampaignError("No pudimos cargar el cómputo. Intenta nuevamente.");
+      .catch(() => {
+        if (campaign) setRemoteRaised(campaign.raised);
       })
-      .finally(() => setLoadingCampaign(false));
+      .finally(() => setLoadingRemote(false));
 
   useEffect(() => {
+    setLoadingRemote(true);
     const ctrl = new AbortController();
-    loadCampaign(ctrl.signal);
+    loadRemote(ctrl.signal);
     return () => ctrl.abort();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [campaign?.id]);
 
-  // Refresh tras volver de Flow (?paid=1)
+  // Refresh tras volver de Flow
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("paid") !== "1") return;
@@ -83,7 +78,7 @@ const CampanaCarpinteria = () => {
     const tick = async () => {
       if (cancelled) return;
       attempts += 1;
-      await loadCampaign();
+      await loadRemote();
       if (attempts < 6 && !cancelled) setTimeout(tick, 2500);
     };
     tick();
@@ -91,18 +86,35 @@ const CampanaCarpinteria = () => {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const total = hammers * HAMMER_PRICE;
-  const goal = campaign?.goal ?? 0;
-  const raised = campaign?.raised ?? 0;
-  const progressPct = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
-  const totalHammers = goal > 0 ? Math.ceil(goal / HAMMER_PRICE) : 0;
-  const hammersAchieved = Math.floor(raised / HAMMER_PRICE);
-  const hammersLeft = Math.max(0, totalHammers - hammersAchieved);
+  if (!campaign) {
+    return (
+      <div className="min-h-screen bg-warm flex flex-col">
+        <SiteHeader />
+        <div className="flex-1 flex items-center justify-center text-foreground/60">
+          No hay campaña activa.
+        </div>
+        <SiteFooter />
+      </div>
+    );
+  }
 
-  const dec = () => setHammers((h) => Math.max(1, h - 1));
-  const inc = () => setHammers((h) => h + 1);
+  const unitAmount = campaign.unitAmount;
+  const total = units * unitAmount;
+  const goal = campaign.goal;
+  const raised = remoteRaised ?? campaign.raised;
+  const progressPct = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
+  const totalUnits = unitAmount > 0 ? Math.ceil(goal / unitAmount) : 0;
+  const unitsAchieved = unitAmount > 0 ? Math.floor(raised / unitAmount) : 0;
+  const unitsLeft = Math.max(0, totalUnits - unitsAchieved);
+
+  const unitWord = (n: number) => (n === 1 ? campaign.unitSingular : campaign.unitPlural);
+  const heroSrc = campaign.imageUrl || heroImg;
+
+  const dec = () => setUnits((h) => Math.max(1, h - 1));
+  const inc = () => setUnits((h) => h + 1);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,7 +124,7 @@ const CampanaCarpinteria = () => {
     try {
       const { redirectUrl } = await createDonation({
         amount: total,
-        campaignId: campaign?.id ?? CAMPAIGN_ID,
+        campaignId: campaign.id,
         name: name || "Donante",
         email: email || "donante@email.com",
       });
@@ -127,49 +139,43 @@ const CampanaCarpinteria = () => {
     <div className="min-h-screen bg-warm overflow-x-hidden flex flex-col">
       <SiteHeader />
 
-      {/* CONTENEDOR PRINCIPAL: Header + Imagen + Métricas */}
       <section className="px-4 sm:px-6 lg:px-10 pt-5">
         <div className="max-w-3xl mx-auto bg-card rounded-[28px] shadow-card border border-border/50 overflow-hidden">
-          {/* HEADER INTERNO */}
           <div className="p-5 sm:p-7">
-            {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-4 py-1.5 font-hand text-[11px] tracking-[0.22em] shadow-sm">
               <Heart className="w-3.5 h-3.5 fill-primary-foreground" />
-              CAMPAÑA DEL MES
+              {campaign.badge.toUpperCase()}
             </div>
 
-            {/* Título */}
             <div className="mt-4">
               <p className="font-display text-secondary uppercase text-xs sm:text-sm tracking-wide leading-tight">
-                Creemos juntos un
+                {campaign.preTitle}
               </p>
               <h1
                 className="font-display text-secondary uppercase tracking-wide leading-[0.95] mt-1"
                 style={{ fontSize: "clamp(28px, 8vw, 56px)", fontWeight: 700 }}
               >
-                Taller de Carpintería
+                {campaign.title}
               </h1>
             </div>
 
-            {/* Subtítulo con hojitas */}
             <div className="mt-3 flex items-center justify-center gap-2">
               <Leaflet className="w-6 h-3 text-secondary -scale-x-100" />
               <p
                 className="font-display text-primary uppercase tracking-wide text-center"
                 style={{ fontSize: "clamp(13px, 3.5vw, 18px)", fontWeight: 600 }}
               >
-                Para toda la comunidad
+                {campaign.subtitle}
               </p>
               <Leaflet className="w-6 h-3 text-secondary" />
             </div>
           </div>
 
-          {/* IMAGEN */}
           <div className="px-5 sm:px-7">
             <div className="rounded-[20px] overflow-hidden">
               <img
-                src={heroImg}
-                alt="Taller de carpintería bajo un gran árbol"
+                src={heroSrc}
+                alt={campaign.title}
                 className="w-full h-auto object-cover aspect-[16/10]"
                 width={1280}
                 height={800}
@@ -177,7 +183,6 @@ const CampanaCarpinteria = () => {
             </div>
           </div>
 
-          {/* MÉTRICAS */}
           <div className="p-5 sm:p-7 pt-5">
             <div className="grid grid-cols-3 gap-2 sm:gap-4 items-start">
               <div className="min-w-0">
@@ -186,7 +191,7 @@ const CampanaCarpinteria = () => {
                   className="font-display text-primary mt-1 leading-none"
                   style={{ fontSize: "clamp(15px, 4.2vw, 26px)", fontWeight: 700 }}
                 >
-                  {loadingCampaign ? "—" : formatCLP(goal)}
+                  {formatCLP(goal)}
                 </p>
               </div>
               <div className="border-l border-border/60 pl-2 sm:pl-4 min-w-0">
@@ -195,25 +200,26 @@ const CampanaCarpinteria = () => {
                   className="font-display text-secondary mt-1 leading-none"
                   style={{ fontSize: "clamp(15px, 4.2vw, 26px)", fontWeight: 700 }}
                 >
-                  {loadingCampaign ? "—" : formatCLP(raised)}
+                  {loadingRemote ? "—" : formatCLP(raised)}
                 </p>
               </div>
               <div className="border-l border-border/60 pl-2 sm:pl-4 min-w-0">
-                <p className="font-hand text-[10px] tracking-[0.18em] text-foreground/60">MARTILLOS</p>
+                <p className="font-hand text-[10px] tracking-[0.18em] text-foreground/60">
+                  {campaign.unitPlural.toUpperCase()}
+                </p>
                 <p
                   className="font-display text-primary mt-1 leading-none flex items-center gap-1"
                   style={{ fontSize: "clamp(15px, 4.2vw, 26px)", fontWeight: 700 }}
                 >
-                  <Hammer className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-                  <span>{loadingCampaign ? "—" : hammersAchieved.toLocaleString("es-CL")}</span>
+                  <UnitIcon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                  <span>{loadingRemote ? "—" : unitsAchieved.toLocaleString("es-CL")}</span>
                 </p>
                 <p className="text-[11px] text-foreground/60 mt-1">
-                  de {totalHammers.toLocaleString("es-CL")}
+                  de {totalUnits.toLocaleString("es-CL")}
                 </p>
               </div>
             </div>
 
-            {/* Barra de progreso */}
             <div className="mt-5 flex items-center gap-3">
               <div className="relative flex-1 rounded-full bg-secondary-soft overflow-hidden" style={{ height: 14 }}>
                 <div
@@ -228,36 +234,32 @@ const CampanaCarpinteria = () => {
 
             <p className="mt-3 text-center text-xs sm:text-sm text-foreground/75 inline-flex items-center justify-center gap-2 w-full">
               <Heart className="w-3.5 h-3.5 text-primary fill-primary" />
-              {hammersLeft > 0
-                ? `Faltan ${hammersLeft.toLocaleString("es-CL")} martillos para alcanzar el sueño`
+              {unitsLeft > 0
+                ? `Faltan ${unitsLeft.toLocaleString("es-CL")} ${campaign.unitPlural} para alcanzar el sueño`
                 : "¡Sueño alcanzado! Gracias por tu aporte"}
             </p>
-            {campaignError && (
-              <p className="mt-2 text-xs text-destructive text-center">{campaignError}</p>
-            )}
           </div>
         </div>
       </section>
 
-      {/* MÓDULO DE DONACIÓN (inmediatamente después) */}
       <section className="px-4 sm:px-6 lg:px-10 mt-5">
         <div className="max-w-3xl mx-auto bg-primary-soft/70 rounded-[28px] shadow-card border border-primary/15 p-5 sm:p-7">
           <h2
             className="font-display text-secondary uppercase tracking-wide flex items-center gap-2"
             style={{ fontSize: "clamp(20px, 5.2vw, 30px)", fontWeight: 700 }}
           >
-            Dona martillos solidarios
-            <Hammer className="w-6 h-6 text-primary" />
+            Dona {campaign.unitPlural} solidarios
+            <UnitIcon className="w-6 h-6 text-primary" />
           </h2>
           <p className="mt-2 text-sm text-foreground/80">
-            Tu aporte hace posible este taller para niños, adultos y toda la comunidad.
+            {campaign.shortDescription}
           </p>
 
           <div className="mt-5 grid grid-cols-[auto_1fr] gap-4 sm:gap-5 items-center">
             <div className="inline-flex items-center gap-2 sm:gap-3 bg-card rounded-full px-2.5 py-2 border border-border/50 shadow-sm shrink-0">
               <button
                 onClick={dec}
-                aria-label="Quitar martillo"
+                aria-label={`Quitar ${campaign.unitSingular}`}
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-background text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all"
               >
                 <Minus className="w-5 h-5" />
@@ -266,11 +268,11 @@ const CampanaCarpinteria = () => {
                 className="font-display text-secondary tabular-nums w-8 sm:w-10 text-center"
                 style={{ fontSize: "clamp(20px, 5vw, 28px)", fontWeight: 700, lineHeight: 1 }}
               >
-                {hammers}
+                {units}
               </span>
               <button
                 onClick={inc}
-                aria-label="Agregar martillo"
+                aria-label={`Agregar ${campaign.unitSingular}`}
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary-soft text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all"
               >
                 <Plus className="w-5 h-5" />
@@ -285,7 +287,7 @@ const CampanaCarpinteria = () => {
                 {formatCLP(total)}
               </p>
               <p className="text-[11px] text-foreground/60 mt-1">
-                {hammers} {hammers === 1 ? "martillo" : "martillos"}
+                {units} {unitWord(units)}
               </p>
             </div>
           </div>
@@ -295,7 +297,7 @@ const CampanaCarpinteria = () => {
             className="mt-5 w-full inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-full px-6 py-4 font-hand text-sm sm:text-base tracking-[0.2em] shadow-card hover:bg-primary/90 hover:-translate-y-0.5 transition-all"
           >
             <Heart className="w-5 h-5 fill-primary-foreground" />
-            DONA MARTILLOS SOLIDARIOS
+            DONA {campaign.unitPlural.toUpperCase()} SOLIDARIOS
           </button>
           <p className="mt-3 inline-flex items-center justify-center gap-2 text-xs text-foreground/70 w-full">
             <Lock className="w-3.5 h-3.5" /> Pago seguro con Flow
@@ -303,22 +305,19 @@ const CampanaCarpinteria = () => {
         </div>
       </section>
 
-      {/* CONTENIDO ADICIONAL */}
       <section className="px-4 sm:px-6 lg:px-10 mt-5 pb-12 flex-1">
         <div className="max-w-3xl mx-auto bg-card rounded-[28px] shadow-card border border-border/50 p-5 sm:p-7">
           <div className="flex items-center gap-2">
             <Leaf className="w-5 h-5 text-secondary" />
             <h2 className="font-display text-secondary text-xl sm:text-2xl uppercase tracking-wide">
-              Sobre este taller
+              Sobre esta campaña
             </h2>
           </div>
           <p className="font-display text-secondary text-lg sm:text-xl mt-3">
-            Un espacio para aprender, crear, compartir y construir juntos.
+            {campaign.shortDescription}
           </p>
-          <p className="mt-3 text-sm sm:text-base text-foreground/80 leading-relaxed">
-            Este taller será para los niños de Kimün, y en las tardes estará abierto
-            para toda la comunidad, especialmente para personas adultas mayores que
-            quieran iniciarse o seguir creciendo en el oficio de la carpintería.
+          <p className="mt-3 text-sm sm:text-base text-foreground/80 leading-relaxed whitespace-pre-line">
+            {campaign.longDescription}
           </p>
 
           <ul className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -340,26 +339,25 @@ const CampanaCarpinteria = () => {
               <Sprout className="w-7 h-7 text-secondary" />
               <p className="font-hand text-xs tracking-widest text-secondary">PARA EL FUTURO</p>
               <p className="text-sm text-foreground/75 leading-snug">
-                Un oficio que transforma y conecta.
+                Una causa que transforma y conecta.
               </p>
             </li>
           </ul>
         </div>
       </section>
 
-      {/* CHECKOUT MODAL */}
       <Dialog open={openCheckout} onOpenChange={setOpenCheckout}>
         <DialogContent className="bg-card border-border max-w-md rounded-3xl">
           <DialogHeader>
             <DialogTitle className="font-display text-2xl text-secondary text-center leading-tight">
-              Estás a un paso de donar tus martillos solidarios
+              Estás a un paso de donar tus {campaign.unitPlural} solidarios
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
             <div className="bg-secondary-soft rounded-2xl p-4 text-sm">
               <div className="flex justify-between">
-                <span className="text-foreground/70">Martillos</span>
-                <span className="font-semibold text-foreground">{hammers}</span>
+                <span className="text-foreground/70 capitalize">{campaign.unitPlural}</span>
+                <span className="font-semibold text-foreground">{units}</span>
               </div>
               <div className="flex justify-between mt-1">
                 <span className="text-foreground/70">Total a donar</span>

@@ -16,7 +16,6 @@ type DonorRow = {
 };
 
 export default function AdminDonantes() {
-  const [token, setToken] = useState(getAdminToken());
   const [items, setItems] = useState<AdminDonation[]>([]);
   const [loading, setLoading] = useState(false);
   const [note, setNote] = useState<string | null>(null);
@@ -24,14 +23,13 @@ export default function AdminDonantes() {
   const [year, setYear] = useState(new Date().getFullYear());
   const [q, setQ] = useState("");
 
-  const load = async (t: string) => {
+  const load = async () => {
     setLoading(true); setError(null); setNote(null);
-    const r = await fetchAdminDonantes(t);
+    const r = await fetchAdminDonantes();
     if (r.ok && r.items.length) {
       setItems(r.items);
     } else {
-      // fallback: derivar desde /admin/donations
-      const r2 = await fetchAdminDonations(t);
+      const r2 = await fetchAdminDonations();
       if (r2.ok) {
         setItems(r2.items);
       } else if (r2.reason === "missing" || r2.reason === "server") {
@@ -44,7 +42,7 @@ export default function AdminDonantes() {
     setLoading(false);
   };
 
-  useEffect(() => { load(token); /* eslint-disable-next-line */ }, []);
+  useEffect(() => { load(); }, []);
 
   const rows: DonorRow[] = useMemo(() => {
     const map = new Map<string, DonorRow>();

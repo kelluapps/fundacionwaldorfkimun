@@ -99,24 +99,7 @@ const Arbol = () => {
         </div>
       </section>
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-card border-border max-w-md rounded-3xl">
-          <DialogHeader>
-            <DialogTitle className="font-display text-3xl text-secondary text-center">
-              Estás a punto de ser parte de este árbol 🌳
-            </DialogTitle>
-            <DialogDescription className="text-center text-foreground/75 pt-3">
-              {selectedTier && <>Has elegido <span className="text-primary font-semibold">{selectedTier}</span>. </>}
-              Pronto podrás completar tu aporte mensual.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="sm:justify-center pt-2">
-            <button onClick={() => setOpen(false)} className="bg-primary text-primary-foreground rounded-full px-8 py-3 font-hand text-sm tracking-[0.22em] hover:bg-primary/90">
-              VOLVER
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <SocioModal open={open} onOpenChange={setOpen} plan={selectedPlan} />
       <SiteFooter />
     </div>
   );

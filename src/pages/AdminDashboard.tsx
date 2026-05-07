@@ -2,13 +2,14 @@ import { Link } from "react-router-dom";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import AdminNav from "@/components/admin/AdminNav";
+import AdminGuard from "@/components/admin/AdminGuard";
 import { useCampaigns } from "@/lib/campaigns";
 import {
   fetchCampaigns,
   fetchAdminDonations,
   fetchAdminSocios,
   formatCLP,
-  getAdminToken,
+  clearAdminToken,
   MOCK_DONATIONS,
   MOCK_SOCIOS,
   type AdminDonation,
@@ -16,7 +17,7 @@ import {
   type KimunCampaign,
 } from "@/lib/kimun-api";
 import { useEffect, useMemo, useState } from "react";
-import { Cloud, Palette, Eye, ArrowRight, HandCoins, Users, UserCheck, CalendarRange } from "lucide-react";
+import { Cloud, Palette, Eye, ArrowRight, HandCoins, Users, UserCheck, CalendarRange, LogOut } from "lucide-react";
 
 export default function AdminDashboard() {
   const local = useCampaigns();

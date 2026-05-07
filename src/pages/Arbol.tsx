@@ -6,14 +6,6 @@ import sproutImg from "@/assets/card-sprout.png";
 import branchImg from "@/assets/card-branch.png";
 import leafImg from "@/assets/card-leaf.png";
 import fruitImg from "@/assets/card-fruit.png";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import SocioModal, { type SocioPlan } from "@/components/SocioModal";

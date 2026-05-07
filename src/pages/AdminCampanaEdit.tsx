@@ -143,7 +143,7 @@ export default function AdminCampanaEdit() {
         // Sync locally too
         setCampaign((c) => (c ? { ...c, raised: raisedToSend, remoteCampaignId: remoteId } : c));
       } else {
-        setApiMsg({ kind: "err", text: result.message });
+        setApiMsg({ kind: "err", text: result.ok ? "" : result.message });
       }
     } finally {
       setApiSaving(false);

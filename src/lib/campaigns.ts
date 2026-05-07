@@ -97,6 +97,7 @@ const defaultSeed = (): Campaign[] => [
   {
     id: "taller-carpinteria",
     active: true,
+    status: "principal",
     title: "Taller de Carpintería",
     badge: "Campaña del mes",
     preTitle: "Creemos juntos un",

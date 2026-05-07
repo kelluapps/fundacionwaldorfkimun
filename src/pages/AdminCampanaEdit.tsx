@@ -11,14 +11,14 @@ import {
   type Campaign,
   type CampaignIconKey,
 } from "@/lib/campaigns";
-import { formatCLP, fetchCampaigns, type KimunCampaign } from "@/lib/kimun-api";
+import { formatCLP, fetchCampaigns, getAdminToken, setAdminToken, putCampaign, type KimunCampaign } from "@/lib/kimun-api";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Eye, Save, Star, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Eye, Save, Star, Image as ImageIcon, Cloud, KeyRound } from "lucide-react";
 
 export default function AdminCampanaEdit() {
   const { id = "" } = useParams();
@@ -29,6 +29,13 @@ export default function AdminCampanaEdit() {
   const [remoteItems, setRemoteItems] = useState<KimunCampaign[]>([]);
   const [remoteLoading, setRemoteLoading] = useState(true);
   const [remoteError, setRemoteError] = useState<string | null>(null);
+  const [adminToken, setAdminTokenState] = useState<string>(() => getAdminToken());
+  const [apiSaving, setApiSaving] = useState(false);
+  const [apiMsg, setApiMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+
+  useEffect(() => {
+    setAdminToken(adminToken);
+  }, [adminToken]);
 
   useEffect(() => {
     const found = loadCampaigns().find((c) => c.id === id) ?? null;
@@ -85,6 +92,62 @@ export default function AdminCampanaEdit() {
     handleSave();
     setActiveCampaign(slugify(campaign.id || campaign.title));
     alert("Campaña publicada como activa");
+  };
+
+  const buildApiBody = (c: Campaign, isActive: boolean) => {
+    const remoteId = c.remoteCampaignId || c.id;
+    return {
+      id: remoteId,
+      title: c.title,
+      badge: c.badge,
+      preTitle: c.preTitle,
+      subtitle: c.subtitle,
+      shortDescription: c.shortDescription,
+      longDescription: c.longDescription,
+      goal: c.goal,
+      raised: c.raised,
+      unitSingular: c.unitSingular,
+      unitPlural: c.unitPlural,
+      unitPublicName: c.unitPublicName,
+      unitAmount: c.unitAmount,
+      unitIcon: c.unitIcon,
+      imageUrl: c.imageUrl,
+      secondaryImageUrl: "",
+      videoUrl: c.videoUrl ?? "",
+      isActive,
+      active: isActive,
+    };
+  };
+
+  const handleSaveApi = async (publishActive = false) => {
+    if (!campaign) return;
+    setApiMsg(null);
+    setApiSaving(true);
+    try {
+      const remoteId = campaign.remoteCampaignId || slugify(campaign.id || campaign.title);
+      // Preserve existing raised on the API if not explicitly modified
+      let raisedToSend = campaign.raised;
+      try {
+        const list = await fetchCampaigns();
+        const existing = list.find((x) => x.id === remoteId);
+        if (existing && (!campaign.raised || campaign.raised === 0)) {
+          raisedToSend = existing.raised;
+        }
+      } catch {
+        /* ignore preflight errors */
+      }
+      const body = buildApiBody({ ...campaign, raised: raisedToSend, remoteCampaignId: remoteId }, publishActive || campaign.active);
+      const result = await putCampaign(remoteId, body, adminToken);
+      if (result.ok === true) {
+        setApiMsg({ kind: "ok", text: "Campaña guardada correctamente en la API" });
+        setCampaign((c) => (c ? { ...c, raised: raisedToSend, remoteCampaignId: remoteId } : c));
+      } else {
+        const msg = (result as { ok: false; message: string }).message;
+        setApiMsg({ kind: "err", text: msg });
+      }
+    } finally {
+      setApiSaving(false);
+    }
   };
 
   return (
@@ -157,6 +220,46 @@ export default function AdminCampanaEdit() {
                   </p>
                 )}
               </Field>
+
+              <Field label="Token de administrador">
+                <div className="relative">
+                  <KeyRound className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" />
+                  <input
+                    type="password"
+                    value={adminToken}
+                    onChange={(e) => setAdminTokenState(e.target.value)}
+                    placeholder="Pega aquí tu ADMIN_TOKEN"
+                    className="w-full rounded-full border border-border bg-background pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <p className="text-[11px] text-foreground/50 mt-1">
+                  Solo se guarda en esta sesión del navegador.
+                </p>
+              </Field>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => handleSaveApi(false)}
+                  disabled={apiSaving || !adminToken}
+                  className="inline-flex items-center gap-1 text-xs px-4 py-2 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 disabled:opacity-50"
+                >
+                  <Cloud className="w-3.5 h-3.5" />
+                  {apiSaving ? "Guardando…" : "Guardar campaña en API"}
+                </button>
+                <button
+                  onClick={() => handleSaveApi(true)}
+                  disabled={apiSaving || !adminToken}
+                  className="inline-flex items-center gap-1 text-xs px-4 py-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                >
+                  <Star className="w-3.5 h-3.5" /> Publicar como activa en API
+                </button>
+              </div>
+
+              {apiMsg && (
+                <p className={`text-xs ${apiMsg.kind === "ok" ? "text-primary" : "text-destructive"}`}>
+                  {apiMsg.text}
+                </p>
+              )}
             </Block>
 
             <Block title="Datos generales">

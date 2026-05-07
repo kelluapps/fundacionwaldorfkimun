@@ -36,8 +36,6 @@ const CampanaCarpinteria = () => {
   const [remoteRaised, setRemoteRaised] = useState<number | null>(null);
   const [loadingRemote, setLoadingRemote] = useState(true);
 
-  const [donating, setDonating] = useState(false);
-  const [donateError, setDonateError] = useState<string | null>(null);
 
   const UnitIcon = useMemo(
     () => (campaign ? ICON_REGISTRY[campaign.unitIcon]?.Icon ?? ICON_REGISTRY.heart.Icon : ICON_REGISTRY.heart.Icon),

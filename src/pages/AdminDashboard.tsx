@@ -3,19 +3,33 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import AdminNav from "@/components/admin/AdminNav";
 import { useCampaigns } from "@/lib/campaigns";
-import { fetchCampaigns, formatCLP, type KimunCampaign } from "@/lib/kimun-api";
-import { useEffect, useState } from "react";
-import { Cloud, Palette, Eye, ArrowRight } from "lucide-react";
+import {
+  fetchCampaigns,
+  fetchAdminDonations,
+  fetchAdminSocios,
+  formatCLP,
+  getAdminToken,
+  MOCK_DONATIONS,
+  MOCK_SOCIOS,
+  type AdminDonation,
+  type AdminSocio,
+  type KimunCampaign,
+} from "@/lib/kimun-api";
+import { useEffect, useMemo, useState } from "react";
+import { Cloud, Palette, Eye, ArrowRight, HandCoins, Users, UserCheck, CalendarRange } from "lucide-react";
 
 export default function AdminDashboard() {
   const local = useCampaigns();
   const [remote, setRemote] = useState<KimunCampaign[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [donations, setDonations] = useState<AdminDonation[]>([]);
+  const [socios, setSocios] = useState<AdminSocio[]>([]);
 
   useEffect(() => {
-    fetchCampaigns()
-      .then(setRemote)
-      .catch(() => setErr("No pudimos conectar con el Worker"));
+    fetchCampaigns().then(setRemote).catch(() => setErr("No pudimos conectar con el Worker"));
+    const token = getAdminToken();
+    fetchAdminDonations(token).then((r) => setDonations(r.ok && r.items.length ? r.items : MOCK_DONATIONS));
+    fetchAdminSocios(token).then((r) => setSocios(r.ok && r.items.length ? r.items : MOCK_SOCIOS));
   }, []);
 
   const active = local.find((c) => c.active);

@@ -50,8 +50,11 @@ const TierButton = ({ variant, children, onClick }: { variant: Tier["buttonVaria
 
 const Arbol = () => {
   const [open, setOpen] = useState(false);
-  const [selectedTier, setSelectedTier] = useState<string | null>(null);
-  const handleSelect = (name?: string) => { setSelectedTier(name ?? null); setOpen(true); };
+  const [selectedPlan, setSelectedPlan] = useState<SocioPlan | null>(null);
+  const handleSelect = (t: Tier) => {
+    setSelectedPlan({ key: t.key, name: t.name, amount: t.amount });
+    setOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-background">

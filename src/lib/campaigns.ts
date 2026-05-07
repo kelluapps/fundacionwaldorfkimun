@@ -46,8 +46,13 @@ export const ICON_REGISTRY: Record<CampaignIconKey, { label: string; Icon: Lucid
   brain:    { label: "Cabeza",           Icon: Brain },
 };
 
+export type CampaignStatus = "principal" | "active" | "inactive";
+
 export type Campaign = {
   id: string;
+  /** Estado público de la campaña. "principal" se muestra en /donar, "active" en /campanas/{id}, "inactive" oculta. */
+  status?: CampaignStatus;
+  /** @deprecated Mantener por compatibilidad. Si true equivale a principal. */
   active: boolean;
   title: string;
   badge: string;

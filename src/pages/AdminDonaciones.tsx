@@ -17,11 +17,11 @@ export default function AdminDonaciones() {
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [month, setMonth] = useState<number>(0);
 
-  const load = async (t: string) => {
+  const load = async () => {
     setLoading(true);
     setError(null);
     setNote(null);
-    const r = await fetchAdminDonations(t);
+    const r = await fetchAdminDonations();
     if (r.ok) {
       setItems(r.items);
     } else if (r.reason === "missing" || r.reason === "server") {
@@ -35,8 +35,7 @@ export default function AdminDonaciones() {
   };
 
   useEffect(() => {
-    load(token);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    load();
   }, []);
 
   const campaigns = useMemo(() => {

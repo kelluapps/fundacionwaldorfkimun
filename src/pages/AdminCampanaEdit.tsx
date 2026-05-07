@@ -11,7 +11,7 @@ import {
   type Campaign,
   type CampaignIconKey,
 } from "@/lib/campaigns";
-import { formatCLP } from "@/lib/kimun-api";
+import { formatCLP, fetchCampaigns, type KimunCampaign } from "@/lib/kimun-api";
 import {
   Dialog,
   DialogContent,
@@ -26,10 +26,29 @@ export default function AdminCampanaEdit() {
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
 
+  const [remoteItems, setRemoteItems] = useState<KimunCampaign[]>([]);
+  const [remoteLoading, setRemoteLoading] = useState(true);
+  const [remoteError, setRemoteError] = useState<string | null>(null);
+
   useEffect(() => {
     const found = loadCampaigns().find((c) => c.id === id) ?? null;
     setCampaign(found);
   }, [id]);
+
+  useEffect(() => {
+    const ctrl = new AbortController();
+    setRemoteLoading(true);
+    fetchCampaigns(ctrl.signal)
+      .then((items) => {
+        setRemoteItems(items);
+        setRemoteError(null);
+      })
+      .catch((e) => {
+        if (e?.name !== "AbortError") setRemoteError("No hay causas disponibles en la API");
+      })
+      .finally(() => setRemoteLoading(false));
+    return () => ctrl.abort();
+  }, []);
 
   const set = <K extends keyof Campaign>(k: K, v: Campaign[K]) =>
     setCampaign((c) => (c ? { ...c, [k]: v } : c));

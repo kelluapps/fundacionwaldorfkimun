@@ -61,8 +61,6 @@ export default function AdminDonaciones() {
 
   return (
     <AdminShell title="Últimas donaciones" description="Revisa las últimas donaciones recibidas por campaña.">
-      <AdminTokenBar onChange={(t) => setToken(t)} />
-
       <div className="bg-card rounded-2xl border border-border/50 shadow-card p-4 mb-4 grid gap-2 sm:grid-cols-6">
         <div className="sm:col-span-2 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-foreground/40" />

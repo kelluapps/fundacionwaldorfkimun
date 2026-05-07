@@ -4,7 +4,7 @@ import { Heart, Leaf, Sparkles, Users } from "lucide-react";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import { fetchCampaigns, formatCLP, type KimunCampaign } from "@/lib/kimun-api";
-import { useCampaigns } from "@/lib/campaigns";
+import { useCampaigns, getStatus } from "@/lib/campaigns";
 import heroImg from "@/assets/campanas-hero.jpg";
 import carpinteriaImg from "@/assets/carpinteria-hero.jpg";
 import anfiteatroImg from "@/assets/anfiteatro-hero.jpg";

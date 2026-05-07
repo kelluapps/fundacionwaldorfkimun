@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+
 import {
   Dialog,
   DialogContent,
@@ -8,7 +8,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Loader2, Sprout, Lock, ArrowLeft } from "lucide-react";
-import { createDonation, formatCLP } from "@/lib/kimun-api";
+import { createDonation, createSocio, formatCLP } from "@/lib/kimun-api";
 import { DEFAULT_UPSELL, type Campaign } from "@/lib/campaigns";
 
 type Props = {
@@ -21,7 +21,7 @@ type Props = {
 const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const DonationModal = ({ open, onOpenChange, campaign, units }: Props) => {
-  const navigate = useNavigate();
+  
   const [step, setStep] = useState<1 | 2>(1);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -36,10 +36,6 @@ const DonationModal = ({ open, onOpenChange, campaign, units }: Props) => {
   const remoteId = campaign.remoteCampaignId || campaign.id;
 
   const upsellTitle = campaign.upsellTitle || DEFAULT_UPSELL.upsellTitle;
-  const upsellMessage = campaign.upsellMessage || DEFAULT_UPSELL.upsellMessage;
-  const upsellPrimary = campaign.upsellPrimaryButtonText || DEFAULT_UPSELL.upsellPrimaryButtonText;
-  const upsellSecondary = campaign.upsellSecondaryButtonText || DEFAULT_UPSELL.upsellSecondaryButtonText;
-  const upsellAction = campaign.upsellPrimaryAction || DEFAULT_UPSELL.upsellPrimaryAction;
 
   useEffect(() => {
     if (!open) {
@@ -79,18 +75,24 @@ const DonationModal = ({ open, onOpenChange, campaign, units }: Props) => {
     }
   };
 
-  const handleYesSocio = () => {
-    // Pasar datos precargados a /socios via sessionStorage
+  const handleYesSocio = async () => {
+    setError(null);
+    setLoading(true);
     try {
-      sessionStorage.setItem(
-        "kimun_socio_prefill",
-        JSON.stringify({ name: name.trim(), email: email.trim(), phone: phone.trim() }),
-      );
+      const { redirectUrl } = await createSocio({
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim() || undefined,
+        comment: "Suscripción creada desde upsell de campaña",
+        amount: total,
+        campaignId: remoteId,
+      });
+      if (!redirectUrl) throw new Error("missing redirectUrl");
+      window.location.href = redirectUrl;
     } catch {
-      // ignore
+      setLoading(false);
+      setError("No pudimos iniciar tu aporte mensual. Inténtalo nuevamente.");
     }
-    onOpenChange(false);
-    navigate(upsellAction);
   };
 
   return (
@@ -183,7 +185,14 @@ const DonationModal = ({ open, onOpenChange, campaign, units }: Props) => {
               <div className="mx-auto w-12 h-12 rounded-full bg-primary/15 flex items-center justify-center mb-3">
                 <Sprout className="w-6 h-6 text-primary" />
               </div>
-              <p className="text-sm text-foreground/80 leading-relaxed">{upsellMessage}</p>
+              <p className="text-sm text-foreground/80 leading-relaxed">
+                Podemos convertir este mismo aporte en una ayuda mensual para sostener el sueño de Kimün en el tiempo.
+              </p>
+              <div className="mt-4 rounded-xl bg-card/70 border border-border/60 px-3 py-2 text-sm">
+                <span className="text-foreground/70">Tu aporte mensual sería:&nbsp;</span>
+                <span className="font-display text-primary text-lg">{formatCLP(total)}</span>
+                <span className="text-foreground/70"> / mes</span>
+              </div>
             </div>
 
             {error && <p className="text-xs text-destructive text-center">{error}</p>}
@@ -192,9 +201,10 @@ const DonationModal = ({ open, onOpenChange, campaign, units }: Props) => {
               type="button"
               onClick={handleYesSocio}
               disabled={loading}
-              className="bg-primary text-primary-foreground rounded-full py-3.5 px-4 font-hand text-sm tracking-[0.18em] shadow-card hover:bg-primary/90 transition-all disabled:opacity-60"
+              className="bg-primary text-primary-foreground rounded-full py-3.5 px-4 font-hand text-sm tracking-[0.18em] shadow-card hover:bg-primary/90 transition-all disabled:opacity-60 inline-flex items-center justify-center gap-2"
             >
-              {upsellPrimary}
+              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              {loading ? "CONECTANDO CON FLOW…" : `Sííí, quiero aportar ${formatCLP(total)} al mes 🌱`}
             </button>
             <button
               type="button"
@@ -203,7 +213,7 @@ const DonationModal = ({ open, onOpenChange, campaign, units }: Props) => {
               className="rounded-full border border-border bg-background py-3 px-4 text-sm hover:bg-secondary-soft transition-all disabled:opacity-60 inline-flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              {loading ? "CONECTANDO CON FLOW…" : upsellSecondary}
+              {loading ? "CONECTANDO CON FLOW…" : "No, por ahora solo donaré a este proyecto"}
             </button>
 
             <button
@@ -215,8 +225,8 @@ const DonationModal = ({ open, onOpenChange, campaign, units }: Props) => {
               <ArrowLeft className="w-3 h-3" /> Volver
             </button>
 
-            <p className="text-[11px] text-foreground/55 text-center font-hand tracking-widest">
-              TU APORTE MENSUAL NOS AYUDA A SOSTENER ESTE SUEÑO EN EL TIEMPO.
+            <p className="text-[11px] text-foreground/60 text-center inline-flex items-center justify-center gap-1.5">
+              <Lock className="w-3 h-3" /> Pago seguro procesado por Flow
             </p>
           </div>
         )}

@@ -180,15 +180,22 @@ function AdminCampanaEditInner() {
               <Field label="Slug / ID (URL)">
                 <Input value={campaign.id} onChange={(v) => set("id", slugify(v))} placeholder="taller-carpinteria" />
               </Field>
-              <Field label="Estado">
-                <label className="inline-flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={campaign.active}
-                    onChange={(e) => set("active", e.target.checked)}
-                  />
-                  Marcar como campaña activa (causa del mes)
-                </label>
+              <Field label="Estado público">
+                <select
+                  value={getStatus(campaign)}
+                  onChange={(e) => {
+                    const v = e.target.value as CampaignStatus;
+                    setCampaign((c) => (c ? { ...c, status: v, active: v === "principal" } : c));
+                  }}
+                  className="w-full rounded-full border border-border bg-background px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
+                >
+                  <option value="principal">Principal · Causa del mes (se muestra en /donar)</option>
+                  <option value="active">Activa (visible en /campanas/{campaign.id})</option>
+                  <option value="inactive">No activa (oculta del público)</option>
+                </select>
+                <p className="text-[11px] text-foreground/55 mt-2">
+                  Solo puede haber una campaña principal a la vez. Las activas conviven en paralelo.
+                </p>
               </Field>
             </Block>
 

@@ -19,7 +19,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { Cloud, Palette, Eye, ArrowRight, HandCoins, Users, UserCheck, CalendarRange, LogOut } from "lucide-react";
 
-export default function AdminDashboard() {
+function AdminDashboardInner() {
   const local = useCampaigns();
   const [remote, setRemote] = useState<KimunCampaign[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -27,10 +27,9 @@ export default function AdminDashboard() {
   const [socios, setSocios] = useState<AdminSocio[]>([]);
 
   useEffect(() => {
-    fetchCampaigns().then(setRemote).catch(() => setErr("No pudimos conectar con el Worker"));
-    const token = getAdminToken();
-    fetchAdminDonations(token).then((r) => setDonations(r.ok && r.items.length ? r.items : MOCK_DONATIONS));
-    fetchAdminSocios(token).then((r) => setSocios(r.ok && r.items.length ? r.items : MOCK_SOCIOS));
+    fetchCampaigns().then(setRemote).catch(() => setErr("No pudimos conectarnos con la API. Revisa tu clave."));
+    fetchAdminDonations().then((r) => setDonations(r.ok && r.items.length ? r.items : MOCK_DONATIONS));
+    fetchAdminSocios().then((r) => setSocios(r.ok && r.items.length ? r.items : MOCK_SOCIOS));
   }, []);
 
   const active = local.find((c) => c.active);

@@ -10,6 +10,7 @@ import {
   fetchAdminSocios,
   formatCLP,
   clearAdminToken,
+  KIMUN_API_HOST,
   MOCK_DONATIONS,
   MOCK_SOCIOS,
   type AdminDonation,
@@ -89,6 +90,12 @@ function AdminDashboardInner() {
             </button>
           </div>
           <AdminNav />
+
+          <div className="mb-4 inline-flex items-center gap-2 text-[11px] font-hand tracking-[0.18em] uppercase px-3 py-1.5 rounded-full bg-secondary-soft text-secondary">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+            API conectada: {KIMUN_API_HOST}
+          </div>
+
 
           <div className="grid sm:grid-cols-3 gap-4 mb-6">
             <Stat label="Campañas en API" value={remote ? String(remote.length) : err ? "—" : "…"} />

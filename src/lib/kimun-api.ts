@@ -1,5 +1,6 @@
-export const KIMUN_API_BASE =
-  "https://kimun-donaciones-worker.jorgeaguirrecanciones.workers.dev";
+const ENV_API_URL = (import.meta as any)?.env?.VITE_KIMUN_API_URL as string | undefined;
+export const KIMUN_API_BASE = ENV_API_URL || "https://give.dev-waldorfkimun.workers.dev";
+export const KIMUN_API_HOST = KIMUN_API_BASE.replace(/^https?:\/\//, "");
 
 export const HAMMER_PRICE = 5_000;
 

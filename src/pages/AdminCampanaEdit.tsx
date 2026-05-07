@@ -29,13 +29,6 @@ export default function AdminCampanaEdit() {
   const [remoteItems, setRemoteItems] = useState<KimunCampaign[]>([]);
   const [remoteLoading, setRemoteLoading] = useState(true);
   const [remoteError, setRemoteError] = useState<string | null>(null);
-  const [adminToken, setAdminTokenState] = useState<string>(() => getAdminToken());
-  const [apiSaving, setApiSaving] = useState(false);
-  const [apiMsg, setApiMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
-
-  useEffect(() => {
-    setAdminToken(adminToken);
-  }, [adminToken]);
 
   useEffect(() => {
     const found = loadCampaigns().find((c) => c.id === id) ?? null;

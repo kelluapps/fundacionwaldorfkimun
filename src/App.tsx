@@ -11,6 +11,9 @@ import Gracias from "./pages/Gracias.tsx";
 import GraciasSocio from "./pages/GraciasSocio.tsx";
 import AdminCampanas from "./pages/AdminCampanas.tsx";
 import AdminCampanaEdit from "./pages/AdminCampanaEdit.tsx";
+import AdminDashboard from "./pages/AdminDashboard.tsx";
+import AdminApi from "./pages/AdminApi.tsx";
+import AdminPreview from "./pages/AdminPreview.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
 

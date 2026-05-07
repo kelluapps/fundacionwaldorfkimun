@@ -82,11 +82,11 @@ export default function AdminApi() {
     };
     const result = await putCampaign(slug, body, token);
     setSaving(false);
-    if (result.ok) {
+    if (result.ok === true) {
       setMsg({ kind: "ok", text: "Campaña creada correctamente en la API" });
       loadList();
     } else {
-      setMsg({ kind: "err", text: result.message });
+      setMsg({ kind: "err", text: (result as { ok: false; message: string }).message });
     }
   };
 

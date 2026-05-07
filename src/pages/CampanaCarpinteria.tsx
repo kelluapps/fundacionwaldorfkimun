@@ -12,14 +12,9 @@ import {
 import heroImg from "@/assets/carpinteria-hero.jpg";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { formatCLP, fetchCampaigns, createDonation } from "@/lib/kimun-api";
+import { formatCLP, fetchCampaigns } from "@/lib/kimun-api";
 import { useActiveCampaign, ICON_REGISTRY } from "@/lib/campaigns";
+import DonationModal from "@/components/DonationModal";
 
 const Leaflet = ({ className = "" }: { className?: string }) => (
   <svg viewBox="0 0 60 24" className={className} aria-hidden="true">

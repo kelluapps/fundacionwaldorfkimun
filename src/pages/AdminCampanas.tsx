@@ -6,9 +6,11 @@ import AdminNav from "@/components/admin/AdminNav";
 import AdminGuard from "@/components/admin/AdminGuard";
 import {
   useCampaigns,
-  setActiveCampaign,
+  setMainCampaign,
+  setCampaignStatus,
   deleteCampaign,
   upsertCampaign,
+  getStatus,
   ICON_REGISTRY,
   slugify,
   type Campaign,

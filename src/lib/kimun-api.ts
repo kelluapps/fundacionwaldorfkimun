@@ -41,6 +41,30 @@ export async function createDonation(input: DonateInput): Promise<{ redirectUrl:
 
 export const formatCLP = (n: number) => "$" + (n ?? 0).toLocaleString("es-CL");
 
+export type SocioInput = {
+  name: string;
+  email: string;
+  phone?: string;
+  comment?: string;
+  amount: number;
+  campaignId?: string;
+};
+
+export async function createSocio(input: SocioInput): Promise<{ redirectUrl: string; intentId?: string }> {
+  const res = await fetch(`${KIMUN_API_BASE}/socio`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ campaignId: "socios-kimun", ...input }),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Suscripción falló (${res.status}): ${text || "error desconocido"}`);
+  }
+  const data = await res.json();
+  if (!data?.redirectUrl) throw new Error("Respuesta sin redirectUrl");
+  return data;
+}
+
 const ADMIN_TOKEN_KEY = "kimun.adminToken";
 
 export function getAdminToken(): string {

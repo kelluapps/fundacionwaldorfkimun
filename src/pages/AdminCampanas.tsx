@@ -261,3 +261,11 @@ function AdminCampanasInner() {
     </div>
   );
 }
+
+export default function AdminCampanas() {
+  return (
+    <AdminGuard>
+      <AdminCampanasInner />
+    </AdminGuard>
+  );
+}

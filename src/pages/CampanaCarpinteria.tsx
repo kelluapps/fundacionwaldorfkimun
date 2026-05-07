@@ -53,7 +53,8 @@ const CampanaCarpinteria = () => {
     fetchCampaigns(signal)
       .then((items) => {
         if (!campaign) return;
-        const found = items.find((c) => c.id === campaign.id);
+        const remoteId = campaign.remoteCampaignId || campaign.id;
+        const found = items.find((c) => c.id === remoteId);
         setRemoteRaised(found?.raised ?? campaign.raised);
       })
       .catch(() => {
@@ -124,7 +125,7 @@ const CampanaCarpinteria = () => {
     try {
       const { redirectUrl } = await createDonation({
         amount: total,
-        campaignId: campaign.id,
+        campaignId: campaign.remoteCampaignId || campaign.id,
         name: name || "Donante",
         email: email || "donante@email.com",
       });

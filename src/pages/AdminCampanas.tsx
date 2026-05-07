@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import AdminNav from "@/components/admin/AdminNav";
+import AdminGuard from "@/components/admin/AdminGuard";
 import {
   useCampaigns,
   setActiveCampaign,
@@ -12,8 +13,8 @@ import {
   slugify,
   type Campaign,
 } from "@/lib/campaigns";
-import { fetchCampaigns, formatCLP, type KimunCampaign } from "@/lib/kimun-api";
-import { CheckCircle2, Plus, Pencil, Trash2, Eye, Star, RefreshCw, Download, Palette } from "lucide-react";
+import { fetchCampaigns, formatCLP, clearAdminToken, type KimunCampaign } from "@/lib/kimun-api";
+import { CheckCircle2, Plus, Pencil, Trash2, Eye, Star, RefreshCw, Download, Palette, LogOut } from "lucide-react";
 
 const blankFromRemote = (r: KimunCampaign): Campaign => ({
   id: slugify(r.id) || `causa-${Date.now()}`,

@@ -209,7 +209,7 @@ export default function CampanasPublic() {
                   to={hrefFor(featured)}
                   className="mt-7 inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-full px-7 py-3.5 font-hand text-xs tracking-[0.22em] shadow-card hover:bg-primary/90 hover:-translate-y-0.5 transition-all self-start"
                 >
-                  <Heart className="w-4 h-4" fill="currentColor" /> VER CAMPAÑA
+                  <Heart className="w-4 h-4" fill="currentColor" /> VER CAUSA DEL MES
                 </Link>
               </div>
             </article>

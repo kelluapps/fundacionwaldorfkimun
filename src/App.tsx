@@ -35,6 +35,7 @@ const App = () => (
           <Route path="/hazte-socio" element={<Navigate to="/socios" replace />} />
           <Route path="/contacto" element={<Contacto />} />
           <Route path="/gracias" element={<Gracias />} />
+          <Route path="/gracias-socio" element={<GraciasSocio />} />
           <Route path="/admin" element={<Navigate to="/admin/campanas" replace />} />
           <Route path="/admin/campanas" element={<AdminCampanas />} />
           <Route path="/admin/campanas/:id" element={<AdminCampanaEdit />} />

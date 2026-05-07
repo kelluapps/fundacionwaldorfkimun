@@ -185,10 +185,11 @@ export type SaveCampaignResult =
 export async function putCampaign(
   campaignId: string,
   body: Record<string, unknown>,
-  token: string,
+  tokenArg?: string,
 ): Promise<SaveCampaignResult> {
+  const token = tokenArg ?? getAdminToken();
   if (!token) {
-    return { ok: false, reason: "unauthorized", message: "Token de administrador incorrecto" };
+    return { ok: false, reason: "unauthorized", message: "La clave secreta no es correcta o expiró. Vuelve a ingresarla." };
   }
   try {
     const res = await fetch(`${KIMUN_API_BASE}/campaigns/${encodeURIComponent(campaignId)}`, {
@@ -200,7 +201,8 @@ export async function putCampaign(
       body: JSON.stringify(body),
     });
     if (res.status === 401 || res.status === 403) {
-      return { ok: false, reason: "unauthorized", message: "Token de administrador incorrecto" };
+      notifyUnauthorized();
+      return { ok: false, reason: "unauthorized", message: "La clave secreta no es correcta o expiró. Vuelve a ingresarla." };
     }
     if (!res.ok) {
       const text = await res.text().catch(() => "");
@@ -208,7 +210,7 @@ export async function putCampaign(
     }
     return { ok: true };
   } catch {
-    return { ok: false, reason: "network", message: "No pudimos conectar con el Worker" };
+    return { ok: false, reason: "network", message: "No pudimos conectarnos con la API. Revisa tu clave." };
   }
 }
 

@@ -126,16 +126,18 @@ export type AdminFetchResult<T> = {
   message?: string;
 };
 
-async function adminGet<T>(path: string, token: string): Promise<AdminFetchResult<T>> {
+async function adminGet<T>(path: string, tokenArg?: string): Promise<AdminFetchResult<T>> {
+  const token = tokenArg ?? getAdminToken();
   if (!token) {
-    return { ok: false, items: [], reason: "unauthorized", message: "Token de administrador incorrecto" };
+    return { ok: false, items: [], reason: "unauthorized", message: "La clave secreta no es correcta o expiró. Vuelve a ingresarla." };
   }
   try {
     const res = await fetch(`${KIMUN_API_BASE}${path}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (res.status === 401 || res.status === 403) {
-      return { ok: false, items: [], reason: "unauthorized", message: "Token de administrador incorrecto" };
+      notifyUnauthorized();
+      return { ok: false, items: [], reason: "unauthorized", message: "La clave secreta no es correcta o expiró. Vuelve a ingresarla." };
     }
     if (res.status === 404) {
       return { ok: false, items: [], reason: "missing", message: "Endpoint pendiente de conectar en Worker" };
@@ -147,14 +149,14 @@ async function adminGet<T>(path: string, token: string): Promise<AdminFetchResul
     const items = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
     return { ok: true, items: items as T[] };
   } catch {
-    return { ok: false, items: [], reason: "network", message: "No pudimos conectar con el Worker" };
+    return { ok: false, items: [], reason: "network", message: "No pudimos conectarnos con la API. Revisa tu clave." };
   }
 }
 
-export const fetchAdminDonations = (token: string) => adminGet<AdminDonation>("/admin/donations", token);
-export const fetchAdminDonantes = (token: string) => adminGet<AdminDonation>("/admin/donantes", token);
-export const fetchAdminSocios = (token: string) => adminGet<AdminSocio>("/admin/socios", token);
-export const fetchAdminSociosControl = (token: string) => adminGet<AdminSocio>("/admin/socios-control", token);
+export const fetchAdminDonations = (token?: string) => adminGet<AdminDonation>("/admin/donations", token);
+export const fetchAdminDonantes = (token?: string) => adminGet<AdminDonation>("/admin/donantes", token);
+export const fetchAdminSocios = (token?: string) => adminGet<AdminSocio>("/admin/socios", token);
+export const fetchAdminSociosControl = (token?: string) => adminGet<AdminSocio>("/admin/socios-control", token);
 
 // =============================================================
 // Mocks de respaldo cuando los endpoints aún no existen

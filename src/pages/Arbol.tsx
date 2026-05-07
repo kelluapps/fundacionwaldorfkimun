@@ -81,7 +81,7 @@ const Arbol = () => {
                 </div>
                 <p className="font-display text-3xl text-primary leading-none">{t.price}</p>
                 <p className="text-xs tracking-widest text-foreground/60 mt-1 mb-5 font-hand">aporte mensual</p>
-                <TierButton variant={t.buttonVariant} onClick={() => handleSelect(t.name)}>{t.cta}</TierButton>
+                <TierButton variant={t.buttonVariant} onClick={() => handleSelect(t)}>{t.cta}</TierButton>
               </article>
             ))}
           </div>

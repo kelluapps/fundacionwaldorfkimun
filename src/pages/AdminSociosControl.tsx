@@ -8,20 +8,19 @@ const MES_LABELS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep
 type CellState = "paid" | "pending" | "canceled" | "na";
 
 export default function AdminSociosControl() {
-  const [token, setToken] = useState(getAdminToken());
   const [items, setItems] = useState<AdminSocio[]>([]);
   const [loading, setLoading] = useState(false);
   const [note, setNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [year, setYear] = useState(new Date().getFullYear());
 
-  const load = async (t: string) => {
+  const load = async () => {
     setLoading(true); setError(null); setNote(null);
-    const r = await fetchAdminSociosControl(t);
+    const r = await fetchAdminSociosControl();
     if (r.ok && r.items.length) {
       setItems(r.items);
     } else {
-      const r2 = await fetchAdminSocios(t);
+      const r2 = await fetchAdminSocios();
       if (r2.ok) setItems(r2.items);
       else if (r2.reason === "missing" || r2.reason === "server") {
         setItems(MOCK_SOCIOS);
@@ -31,7 +30,7 @@ export default function AdminSociosControl() {
     setLoading(false);
   };
 
-  useEffect(() => { load(token); /* eslint-disable-next-line */ }, []);
+  useEffect(() => { load(); }, []);
 
   const rows = useMemo(() => {
     const now = new Date();

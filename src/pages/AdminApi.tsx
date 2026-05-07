@@ -2,35 +2,29 @@ import { useEffect, useState } from "react";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import AdminNav from "@/components/admin/AdminNav";
+import AdminGuard from "@/components/admin/AdminGuard";
 import {
   KIMUN_API_BASE,
   fetchCampaigns,
-  getAdminToken,
-  setAdminToken,
   putCampaign,
   formatCLP,
+  clearAdminToken,
   type KimunCampaign,
 } from "@/lib/kimun-api";
 import { slugify } from "@/lib/campaigns";
-import { Cloud, KeyRound, RefreshCw, Save } from "lucide-react";
+import { Cloud, LogOut, RefreshCw, Save } from "lucide-react";
 
-export default function AdminApi() {
-  const [token, setTokenState] = useState<string>(() => getAdminToken());
+function AdminApiInner() {
   const [items, setItems] = useState<KimunCampaign[]>([]);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{ kind: "ok" | "err" | "info"; text: string } | null>(null);
 
-  // form
   const [id, setId] = useState("");
   const [title, setTitle] = useState("");
   const [goal, setGoal] = useState<number>(5_000_000);
   const [raised, setRaised] = useState<number>(0);
   const [active, setActive] = useState<boolean>(true);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    setAdminToken(token);
-  }, [token]);
 
   const loadList = async () => {
     setLoading(true);
@@ -40,7 +34,7 @@ export default function AdminApi() {
       setItems(list);
       if (list.length === 0) setMsg({ kind: "info", text: "No hay causas disponibles en la API" });
     } catch {
-      setMsg({ kind: "err", text: "No pudimos conectar con el Worker" });
+      setMsg({ kind: "err", text: "No pudimos conectarnos con la API. Revisa tu clave." });
     } finally {
       setLoading(false);
     }
@@ -48,7 +42,6 @@ export default function AdminApi() {
 
   useEffect(() => {
     loadList();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleEdit = (c: KimunCampaign) => {
@@ -62,10 +55,6 @@ export default function AdminApi() {
 
   const handleSave = async () => {
     setMsg(null);
-    if (!token) {
-      setMsg({ kind: "err", text: "Token de administrador incorrecto" });
-      return;
-    }
     const slug = slugify(id);
     if (!slug) {
       setMsg({ kind: "err", text: "Debes ingresar un ID de campaña" });
@@ -80,13 +69,13 @@ export default function AdminApi() {
       isActive: active,
       active,
     };
-    const result = await putCampaign(slug, body, token);
+    const result = await putCampaign(slug, body);
     setSaving(false);
     if (result.ok === true) {
       setMsg({ kind: "ok", text: "Campaña creada correctamente en la API" });
       loadList();
     } else {
-      setMsg({ kind: "err", text: (result as { ok: false; message: string }).message });
+      setMsg({ kind: "err", text: result.message });
     }
   };
 
@@ -98,13 +87,28 @@ export default function AdminApi() {
     setActive(true);
   };
 
+  const handleLogout = () => {
+    clearAdminToken();
+    window.location.href = "/admin";
+  };
+
   return (
     <div className="min-h-screen bg-warm flex flex-col">
       <SiteHeader />
       <main className="flex-1 px-4 sm:px-6 lg:px-10 py-8">
         <div className="max-w-4xl mx-auto">
-          <p className="font-hand text-[11px] tracking-[0.22em] text-secondary">ADMIN</p>
-          <h1 className="font-display text-secondary text-3xl uppercase mb-6">API</h1>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="font-hand text-[11px] tracking-[0.22em] text-secondary">ADMIN</p>
+              <h1 className="font-display text-secondary text-3xl uppercase mb-6">API</h1>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center gap-1.5 text-[11px] font-hand tracking-[0.18em] uppercase px-3 py-1.5 rounded-full border border-border hover:bg-secondary-soft text-foreground/70"
+            >
+              <LogOut className="w-3 h-3" /> Cerrar sesión
+            </button>
+          </div>
           <AdminNav />
 
           <section className="bg-card rounded-2xl border border-border/50 shadow-card p-5 sm:p-6 mb-6">
@@ -113,24 +117,10 @@ export default function AdminApi() {
               <h2 className="font-display text-secondary uppercase text-lg">Crear campaña en API</h2>
             </div>
             <p className="text-xs text-foreground/60 mb-5">
-              Crea aquí la campaña real en el Worker. Esta campaña tendrá el ID, meta y recaudación oficial que usará el cómputo.
+              Crea aquí la campaña real en el Worker. Tendrá el ID, meta y recaudación oficial que usará el cómputo.
             </p>
 
             <div className="grid gap-4">
-              <Field label="Token de administrador">
-                <div className="relative">
-                  <KeyRound className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" />
-                  <input
-                    type="password"
-                    value={token}
-                    onChange={(e) => setTokenState(e.target.value)}
-                    placeholder="Pega aquí tu ADMIN_TOKEN"
-                    className="w-full rounded-full border border-border bg-background pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-primary"
-                  />
-                </div>
-                <p className="text-[11px] text-foreground/50 mt-1">Solo se guarda en esta sesión del navegador.</p>
-              </Field>
-
               <div className="grid sm:grid-cols-2 gap-4">
                 <Field label="ID / Slug de campaña">
                   <Input value={id} onChange={(v) => setId(slugify(v))} placeholder="taller-carpinteria" />
@@ -204,7 +194,7 @@ export default function AdminApi() {
               </button>
             </div>
             {items.length === 0 ? (
-              <p className="text-xs text-foreground/60">{loading ? "Cargando…" : "Sin campañas todavía."}</p>
+              <p className="text-xs text-foreground/60">{loading ? "Conectando con la API…" : "Sin campañas todavía."}</p>
             ) : (
               <ul className="divide-y divide-border/40">
                 {items.map((c) => (
@@ -230,6 +220,14 @@ export default function AdminApi() {
       </main>
       <SiteFooter />
     </div>
+  );
+}
+
+export default function AdminApi() {
+  return (
+    <AdminGuard>
+      <AdminApiInner />
+    </AdminGuard>
   );
 }
 

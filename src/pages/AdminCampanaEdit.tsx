@@ -87,62 +87,6 @@ export default function AdminCampanaEdit() {
     alert("Campaña publicada como activa");
   };
 
-  const buildApiBody = (c: Campaign, isActive: boolean) => {
-    const remoteId = c.remoteCampaignId || c.id;
-    return {
-      id: remoteId,
-      title: c.title,
-      badge: c.badge,
-      preTitle: c.preTitle,
-      subtitle: c.subtitle,
-      shortDescription: c.shortDescription,
-      longDescription: c.longDescription,
-      goal: c.goal,
-      raised: c.raised,
-      unitSingular: c.unitSingular,
-      unitPlural: c.unitPlural,
-      unitPublicName: c.unitPublicName,
-      unitAmount: c.unitAmount,
-      unitIcon: c.unitIcon,
-      imageUrl: c.imageUrl,
-      secondaryImageUrl: "",
-      videoUrl: c.videoUrl ?? "",
-      isActive,
-      active: isActive,
-    };
-  };
-
-  const handleSaveApi = async (publishActive = false) => {
-    if (!campaign) return;
-    setApiMsg(null);
-    setApiSaving(true);
-    try {
-      const remoteId = campaign.remoteCampaignId || slugify(campaign.id || campaign.title);
-      // Preserve existing raised on the API if not explicitly modified
-      let raisedToSend = campaign.raised;
-      try {
-        const list = await fetchCampaigns();
-        const existing = list.find((x) => x.id === remoteId);
-        if (existing && (!campaign.raised || campaign.raised === 0)) {
-          raisedToSend = existing.raised;
-        }
-      } catch {
-        /* ignore preflight errors */
-      }
-      const body = buildApiBody({ ...campaign, raised: raisedToSend, remoteCampaignId: remoteId }, publishActive || campaign.active);
-      const result = await putCampaign(remoteId, body, adminToken);
-      if (result.ok === true) {
-        setApiMsg({ kind: "ok", text: "Campaña guardada correctamente en la API" });
-        setCampaign((c) => (c ? { ...c, raised: raisedToSend, remoteCampaignId: remoteId } : c));
-      } else {
-        const msg = (result as { ok: false; message: string }).message;
-        setApiMsg({ kind: "err", text: msg });
-      }
-    } finally {
-      setApiSaving(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-warm flex flex-col">
       <SiteHeader />

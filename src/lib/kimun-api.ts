@@ -22,6 +22,7 @@ export type DonateInput = {
   campaignId: string;
   name: string;
   email: string;
+  phone?: string;
 };
 
 export async function createDonation(input: DonateInput): Promise<{ redirectUrl: string }> {

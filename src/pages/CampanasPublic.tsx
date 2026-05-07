@@ -224,7 +224,7 @@ export default function CampanasPublic() {
             <div className="flex items-center justify-center gap-3 mb-3">
               <Leaflet className="w-10 h-4 text-secondary -scale-x-100" />
               <h2 className="font-display text-secondary text-2xl lg:text-3xl uppercase tracking-wide text-center">
-                Otras campañas
+                Otras campañas activas
               </h2>
               <Leaflet className="w-10 h-4 text-secondary" />
             </div>

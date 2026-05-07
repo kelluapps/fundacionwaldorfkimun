@@ -57,8 +57,6 @@ export default function AdminSociosControl() {
 
   return (
     <AdminShell title="Control mensual de socios" description="Seguimiento anual de aportes mensuales por socio.">
-      <AdminTokenBar onChange={setToken} />
-
       <div className="bg-card rounded-2xl border border-border/50 shadow-card p-4 mb-4 flex items-center gap-3">
         <label className="text-[11px] font-hand tracking-[0.18em] text-foreground/60">AÑO</label>
         <select value={year} onChange={(e) => setYear(Number(e.target.value))} className="text-xs rounded-full border border-border bg-background px-3 py-2">

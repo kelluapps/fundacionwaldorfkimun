@@ -38,7 +38,7 @@ const blankFromRemote = (r: KimunCampaign): Campaign => ({
   updatedAt: new Date().toISOString(),
 });
 
-export default function AdminCampanas() {
+function AdminCampanasInner() {
   const items = useCampaigns();
   const [remote, setRemote] = useState<KimunCampaign[]>([]);
   const [loading, setLoading] = useState(false);
@@ -77,13 +77,28 @@ export default function AdminCampanas() {
     window.location.href = `/admin/campanas/${draft.id}`;
   };
 
+  const handleLogout = () => {
+    clearAdminToken();
+    window.location.href = "/admin";
+  };
+
   return (
     <div className="min-h-screen bg-warm flex flex-col">
       <SiteHeader />
       <main className="flex-1 px-4 sm:px-6 lg:px-10 py-8">
         <div className="max-w-5xl mx-auto">
-          <p className="font-hand text-[11px] tracking-[0.22em] text-secondary">ADMIN</p>
-          <h1 className="font-display text-secondary text-3xl uppercase mb-6">Campañas</h1>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="font-hand text-[11px] tracking-[0.22em] text-secondary">ADMIN</p>
+              <h1 className="font-display text-secondary text-3xl uppercase mb-6">Campañas</h1>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center gap-1.5 text-[11px] font-hand tracking-[0.18em] uppercase px-3 py-1.5 rounded-full border border-border hover:bg-secondary-soft text-foreground/70"
+            >
+              <LogOut className="w-3 h-3" /> Cerrar sesión
+            </button>
+          </div>
           <AdminNav />
 
           <section className="bg-card rounded-2xl border border-border/50 shadow-card p-5 sm:p-6 mb-6">

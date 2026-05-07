@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import SocioModal, { type SocioPlan } from "@/components/SocioModal";
 
 type Tier = {
   key: string;

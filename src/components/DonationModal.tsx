@@ -36,10 +36,6 @@ const DonationModal = ({ open, onOpenChange, campaign, units }: Props) => {
   const remoteId = campaign.remoteCampaignId || campaign.id;
 
   const upsellTitle = campaign.upsellTitle || DEFAULT_UPSELL.upsellTitle;
-  const upsellMessage = campaign.upsellMessage || DEFAULT_UPSELL.upsellMessage;
-  const upsellPrimary = campaign.upsellPrimaryButtonText || DEFAULT_UPSELL.upsellPrimaryButtonText;
-  const upsellSecondary = campaign.upsellSecondaryButtonText || DEFAULT_UPSELL.upsellSecondaryButtonText;
-  const upsellAction = campaign.upsellPrimaryAction || DEFAULT_UPSELL.upsellPrimaryAction;
 
   useEffect(() => {
     if (!open) {

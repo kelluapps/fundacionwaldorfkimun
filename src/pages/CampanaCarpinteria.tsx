@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useParams, Link } from "react-router-dom";
 import {
   Heart,
   Leaf,
@@ -13,7 +14,13 @@ import heroImg from "@/assets/carpinteria-hero.jpg";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import { formatCLP, fetchCampaigns } from "@/lib/kimun-api";
-import { useActiveCampaign, ICON_REGISTRY } from "@/lib/campaigns";
+import {
+  useMainCampaign,
+  useCampaignById,
+  useCampaigns,
+  getStatus,
+  ICON_REGISTRY,
+} from "@/lib/campaigns";
 import DonationModal from "@/components/DonationModal";
 
 const Leaflet = ({ className = "" }: { className?: string }) => (
@@ -27,7 +34,21 @@ const Leaflet = ({ className = "" }: { className?: string }) => (
 );
 
 const CampanaCarpinteria = () => {
-  const campaign = useActiveCampaign();
+  const { id: routeId } = useParams<{ id?: string }>();
+  const main = useMainCampaign();
+  const allCampaigns = useCampaigns();
+
+  // Si la ruta es /campanas/:id buscamos esa específica; si no, la principal.
+  const byRoute = useCampaignById(routeId);
+  // Permitir también buscar por remoteCampaignId
+  const byRemote = useMemo(
+    () => (routeId ? allCampaigns.find((c) => c.remoteCampaignId === routeId) ?? null : null),
+    [routeId, allCampaigns],
+  );
+  const campaign = routeId ? byRoute ?? byRemote : main;
+
+  const status = campaign ? getStatus(campaign) : "inactive";
+  const isInactivePublic = !!routeId && campaign && status === "inactive";
   const [units, setUnits] = useState(1);
   const [openCheckout, setOpenCheckout] = useState(false);
 

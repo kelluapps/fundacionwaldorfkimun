@@ -108,32 +108,35 @@ export type AdminSocio = {
   monthlyPayments?: Record<string, number | "paid" | "pending" | "failed" | "canceled">;
 };
 
-export type AdminFetchResult<T> =
-  | { ok: true; items: T[]; mocked?: boolean; note?: string }
-  | { ok: false; reason: "unauthorized" | "network" | "server" | "missing"; message: string; mockItems?: T[] };
+export type AdminFetchResult<T> = {
+  ok: boolean;
+  items: T[];
+  reason?: "unauthorized" | "network" | "server" | "missing";
+  message?: string;
+};
 
 async function adminGet<T>(path: string, token: string): Promise<AdminFetchResult<T>> {
   if (!token) {
-    return { ok: false, reason: "unauthorized", message: "Token de administrador incorrecto" };
+    return { ok: false, items: [], reason: "unauthorized", message: "Token de administrador incorrecto" };
   }
   try {
     const res = await fetch(`${KIMUN_API_BASE}${path}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (res.status === 401 || res.status === 403) {
-      return { ok: false, reason: "unauthorized", message: "Token de administrador incorrecto" };
+      return { ok: false, items: [], reason: "unauthorized", message: "Token de administrador incorrecto" };
     }
     if (res.status === 404) {
-      return { ok: false, reason: "missing", message: "Endpoint pendiente de conectar en Worker" };
+      return { ok: false, items: [], reason: "missing", message: "Endpoint pendiente de conectar en Worker" };
     }
     if (!res.ok) {
-      return { ok: false, reason: "server", message: `Error ${res.status}` };
+      return { ok: false, items: [], reason: "server", message: `Error ${res.status}` };
     }
     const data = await res.json();
     const items = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
     return { ok: true, items: items as T[] };
   } catch {
-    return { ok: false, reason: "network", message: "No pudimos conectar con el Worker" };
+    return { ok: false, items: [], reason: "network", message: "No pudimos conectar con el Worker" };
   }
 }
 

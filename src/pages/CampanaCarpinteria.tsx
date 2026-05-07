@@ -112,24 +112,6 @@ const CampanaCarpinteria = () => {
   const dec = () => setUnits((h) => Math.max(1, h - 1));
   const inc = () => setUnits((h) => h + 1);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (donating) return;
-    setDonating(true);
-    setDonateError(null);
-    try {
-      const { redirectUrl } = await createDonation({
-        amount: total,
-        campaignId: campaign.remoteCampaignId || campaign.id,
-        name: name || "Donante",
-        email: email || "donante@email.com",
-      });
-      window.location.href = redirectUrl;
-    } catch {
-      setDonating(false);
-      setDonateError("No pudimos iniciar el pago. Intenta nuevamente.");
-    }
-  };
 
   return (
     <div className="min-h-screen bg-warm overflow-x-hidden flex flex-col">

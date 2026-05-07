@@ -167,3 +167,11 @@ function Card({
     </Link>
   );
 }
+
+export default function AdminDashboard() {
+  return (
+    <AdminGuard>
+      <AdminDashboardInner />
+    </AdminGuard>
+  );
+}

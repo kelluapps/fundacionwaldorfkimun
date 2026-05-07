@@ -6,9 +6,11 @@ import AdminNav from "@/components/admin/AdminNav";
 import AdminGuard from "@/components/admin/AdminGuard";
 import {
   useCampaigns,
-  setActiveCampaign,
+  setMainCampaign,
+  setCampaignStatus,
   deleteCampaign,
   upsertCampaign,
+  getStatus,
   ICON_REGISTRY,
   slugify,
   type Campaign,
@@ -197,6 +199,21 @@ function AdminCampanasInner() {
             )}
             {items.map((c) => {
               const Icon = ICON_REGISTRY[c.unitIcon]?.Icon ?? ICON_REGISTRY.heart.Icon;
+              const status = getStatus(c);
+              const viewHref =
+                status === "principal"
+                  ? "/donar"
+                  : status === "active"
+                  ? `/campanas/${c.id}`
+                  : null;
+              const badgeStyle =
+                status === "principal"
+                  ? "bg-primary text-primary-foreground"
+                  : status === "active"
+                  ? "bg-secondary text-secondary-foreground"
+                  : "bg-muted text-foreground/60";
+              const badgeText =
+                status === "principal" ? "PRINCIPAL" : status === "active" ? "ACTIVA" : "NO ACTIVA";
               return (
                 <div key={c.id} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                   <div className="w-12 h-12 rounded-xl bg-secondary-soft flex items-center justify-center shrink-0">
@@ -205,11 +222,10 @@ function AdminCampanasInner() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-display text-secondary text-lg leading-tight truncate">{c.title || c.id}</p>
-                      {c.active && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-hand tracking-[0.18em] bg-primary text-primary-foreground rounded-full px-2 py-0.5">
-                          <CheckCircle2 className="w-3 h-3" /> ACTIVA
-                        </span>
-                      )}
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-hand tracking-[0.18em] rounded-full px-2 py-0.5 ${badgeStyle}`}>
+                        {status === "principal" && <CheckCircle2 className="w-3 h-3" />}
+                        {badgeText}
+                      </span>
                     </div>
                     <p className="text-xs text-foreground/60 mt-0.5">
                       /{c.id} · meta {formatCLP(c.goal)} · {formatCLP(c.unitAmount)} por {c.unitSingular}
@@ -222,20 +238,39 @@ function AdminCampanasInner() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    {!c.active && (
+                    <select
+                      value={status}
+                      onChange={(e) => setCampaignStatus(c.id, e.target.value as "principal" | "active" | "inactive")}
+                      className="text-xs rounded-full border border-border bg-background px-3 py-2 hover:bg-secondary-soft"
+                      title="Cambiar estado"
+                    >
+                      <option value="principal">Principal / Causa del mes</option>
+                      <option value="active">Activa</option>
+                      <option value="inactive">No activa</option>
+                    </select>
+                    {status !== "principal" && status === "active" && (
                       <button
-                        onClick={() => setActiveCampaign(c.id)}
+                        onClick={() => setMainCampaign(c.id)}
                         className="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-full border border-border hover:bg-secondary-soft"
                       >
-                        <Star className="w-3.5 h-3.5" /> Activar
+                        <Star className="w-3.5 h-3.5" /> Hacer principal
                       </button>
                     )}
-                    <Link
-                      to="/donar"
-                      className="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-full border border-border hover:bg-secondary-soft"
-                    >
-                      <Eye className="w-3.5 h-3.5" /> Ver
-                    </Link>
+                    {viewHref ? (
+                      <Link
+                        to={viewHref}
+                        className="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-full border border-border hover:bg-secondary-soft"
+                      >
+                        <Eye className="w-3.5 h-3.5" /> Ver
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={() => alert("Esta campaña no está activa públicamente.")}
+                        className="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-full border border-border text-foreground/50 hover:bg-secondary-soft"
+                      >
+                        <Eye className="w-3.5 h-3.5" /> Ver
+                      </button>
+                    )}
                     <Link
                       to={`/admin/campanas/${c.id}`}
                       className="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90"

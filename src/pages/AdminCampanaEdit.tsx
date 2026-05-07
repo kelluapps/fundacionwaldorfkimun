@@ -6,12 +6,14 @@ import AdminGuard from "@/components/admin/AdminGuard";
 import {
   loadCampaigns,
   upsertCampaign,
-  setActiveCampaign,
+  setMainCampaign,
+  getStatus,
   ICON_REGISTRY,
   slugify,
   DEFAULT_UPSELL,
   type Campaign,
   type CampaignIconKey,
+  type CampaignStatus,
 } from "@/lib/campaigns";
 import { formatCLP, fetchCampaigns, type KimunCampaign } from "@/lib/kimun-api";
 import {
@@ -85,8 +87,8 @@ function AdminCampanaEditInner() {
 
   const handlePublish = () => {
     handleSave();
-    setActiveCampaign(slugify(campaign.id || campaign.title));
-    alert("Campaña publicada como activa");
+    setMainCampaign(slugify(campaign.id || campaign.title));
+    alert("Campaña publicada como principal (causa del mes)");
   };
 
   return (
@@ -100,14 +102,22 @@ function AdminCampanaEditInner() {
           <div className="mt-2 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <h1 className="font-display text-secondary text-3xl uppercase">Editar campaña</h1>
             <div className="flex items-center gap-2 flex-wrap">
-              <Link to="/donar" className="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-full border border-border hover:bg-secondary-soft">
-                <Eye className="w-3.5 h-3.5" /> Vista previa
-              </Link>
+              {(() => {
+                const st = getStatus(campaign);
+                const previewHref = st === "principal" ? "/donar" : st === "active" ? `/campanas/${campaign.id}` : null;
+                return previewHref ? (
+                  <Link to={previewHref} className="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-full border border-border hover:bg-secondary-soft">
+                    <Eye className="w-3.5 h-3.5" /> Vista previa
+                  </Link>
+                ) : (
+                  <span className="text-xs text-foreground/50 px-3 py-2">No activa públicamente</span>
+                );
+              })()}
               <button onClick={handleSave} className="inline-flex items-center gap-1 text-xs px-4 py-2 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90">
                 <Save className="w-3.5 h-3.5" /> Guardar
               </button>
               <button onClick={handlePublish} className="inline-flex items-center gap-1 text-xs px-4 py-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
-                <Star className="w-3.5 h-3.5" /> Publicar como activa
+                <Star className="w-3.5 h-3.5" /> Marcar como principal
               </button>
             </div>
           </div>
@@ -170,15 +180,22 @@ function AdminCampanaEditInner() {
               <Field label="Slug / ID (URL)">
                 <Input value={campaign.id} onChange={(v) => set("id", slugify(v))} placeholder="taller-carpinteria" />
               </Field>
-              <Field label="Estado">
-                <label className="inline-flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={campaign.active}
-                    onChange={(e) => set("active", e.target.checked)}
-                  />
-                  Marcar como campaña activa (causa del mes)
-                </label>
+              <Field label="Estado público">
+                <select
+                  value={getStatus(campaign)}
+                  onChange={(e) => {
+                    const v = e.target.value as CampaignStatus;
+                    setCampaign((c) => (c ? { ...c, status: v, active: v === "principal" } : c));
+                  }}
+                  className="w-full rounded-full border border-border bg-background px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
+                >
+                  <option value="principal">Principal · Causa del mes (se muestra en /donar)</option>
+                  <option value="active">Activa (visible en /campanas/{campaign.id})</option>
+                  <option value="inactive">No activa (oculta del público)</option>
+                </select>
+                <p className="text-[11px] text-foreground/55 mt-2">
+                  Solo puede haber una campaña principal a la vez. Las activas conviven en paralelo.
+                </p>
               </Field>
             </Block>
 

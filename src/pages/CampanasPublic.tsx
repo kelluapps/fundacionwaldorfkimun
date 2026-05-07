@@ -4,7 +4,7 @@ import { Heart, Leaf, Sparkles, Users } from "lucide-react";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import { fetchCampaigns, formatCLP, type KimunCampaign } from "@/lib/kimun-api";
-import { useCampaigns } from "@/lib/campaigns";
+import { useCampaigns, getStatus } from "@/lib/campaigns";
 import heroImg from "@/assets/campanas-hero.jpg";
 import carpinteriaImg from "@/assets/carpinteria-hero.jpg";
 import anfiteatroImg from "@/assets/anfiteatro-hero.jpg";
@@ -55,25 +55,44 @@ export default function CampanasPublic() {
     return () => ctrl.abort();
   }, []);
 
-  const activeLocal = localCampaigns.find((c) => c.active) ?? localCampaigns[0];
-  const activeRemoteId = activeLocal?.remoteCampaignId ?? "taller-carpinteria";
+  // Mapa de configuraciones locales por remoteCampaignId
+  const localByRemote = new Map(
+    localCampaigns
+      .filter((l) => l.remoteCampaignId)
+      .map((l) => [l.remoteCampaignId as string, l]),
+  );
+  // También por id local
+  const localById = new Map(localCampaigns.map((l) => [l.id, l]));
 
-  const sorted = (items ?? []).slice().sort((a, b) => {
-    const aActive = a.isActive || a.active || a.id === activeRemoteId;
-    const bActive = b.isActive || b.active || b.id === activeRemoteId;
-    if (aActive && !bActive) return -1;
-    if (!aActive && bActive) return 1;
+  const mainLocal = localCampaigns.find((c) => getStatus(c) === "principal");
+  const mainRemoteId = mainLocal?.remoteCampaignId ?? mainLocal?.id ?? "taller-carpinteria";
+
+  // Filtrar las campañas API: ocultar las que tienen status local "inactive".
+  // Si no hay local asociada, se muestra como "active" por defecto.
+  const visible = (items ?? []).filter((c) => {
+    const local = localByRemote.get(c.id) ?? localById.get(c.id);
+    if (!local) return true;
+    return getStatus(local) !== "inactive";
+  });
+
+  const sorted = visible.slice().sort((a, b) => {
+    if (a.id === mainRemoteId) return -1;
+    if (b.id === mainRemoteId) return 1;
     return 0;
   });
 
-  const featured = sorted[0];
-  const others = sorted.slice(1);
+  const featured = sorted.find((c) => c.id === mainRemoteId) ?? sorted[0];
+  const others = sorted.filter((c) => c !== featured);
 
-  const hrefFor = (c: ApiCampaign) =>
-    c.id === activeRemoteId ? "/donar" : `/campanas/${c.id}`;
+  const hrefFor = (c: ApiCampaign) => {
+    if (c.id === mainRemoteId) return "/donar";
+    const local = localByRemote.get(c.id) ?? localById.get(c.id);
+    const slug = local?.id ?? c.id;
+    return `/campanas/${slug}`;
+  };
 
   const titleFor = (c: ApiCampaign) => {
-    const local = localCampaigns.find((l) => l.remoteCampaignId === c.id);
+    const local = localByRemote.get(c.id) ?? localById.get(c.id);
     return local?.title ?? c.title;
   };
 
@@ -190,7 +209,7 @@ export default function CampanasPublic() {
                   to={hrefFor(featured)}
                   className="mt-7 inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-full px-7 py-3.5 font-hand text-xs tracking-[0.22em] shadow-card hover:bg-primary/90 hover:-translate-y-0.5 transition-all self-start"
                 >
-                  <Heart className="w-4 h-4" fill="currentColor" /> VER CAMPAÑA
+                  <Heart className="w-4 h-4" fill="currentColor" /> VER CAUSA DEL MES
                 </Link>
               </div>
             </article>
@@ -205,7 +224,7 @@ export default function CampanasPublic() {
             <div className="flex items-center justify-center gap-3 mb-3">
               <Leaflet className="w-10 h-4 text-secondary -scale-x-100" />
               <h2 className="font-display text-secondary text-2xl lg:text-3xl uppercase tracking-wide text-center">
-                Otras campañas
+                Otras campañas activas
               </h2>
               <Leaflet className="w-10 h-4 text-secondary" />
             </div>

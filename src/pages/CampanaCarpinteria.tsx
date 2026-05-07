@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useParams, Link } from "react-router-dom";
 import {
   Heart,
   Leaf,
@@ -13,7 +14,13 @@ import heroImg from "@/assets/carpinteria-hero.jpg";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import { formatCLP, fetchCampaigns } from "@/lib/kimun-api";
-import { useActiveCampaign, ICON_REGISTRY } from "@/lib/campaigns";
+import {
+  useMainCampaign,
+  useCampaignById,
+  useCampaigns,
+  getStatus,
+  ICON_REGISTRY,
+} from "@/lib/campaigns";
 import DonationModal from "@/components/DonationModal";
 
 const Leaflet = ({ className = "" }: { className?: string }) => (
@@ -27,7 +34,21 @@ const Leaflet = ({ className = "" }: { className?: string }) => (
 );
 
 const CampanaCarpinteria = () => {
-  const campaign = useActiveCampaign();
+  const { id: routeId } = useParams<{ id?: string }>();
+  const main = useMainCampaign();
+  const allCampaigns = useCampaigns();
+
+  // Si la ruta es /campanas/:id buscamos esa específica; si no, la principal.
+  const byRoute = useCampaignById(routeId);
+  // Permitir también buscar por remoteCampaignId
+  const byRemote = useMemo(
+    () => (routeId ? allCampaigns.find((c) => c.remoteCampaignId === routeId) ?? null : null),
+    [routeId, allCampaigns],
+  );
+  const campaign = routeId ? byRoute ?? byRemote : main;
+
+  const status = campaign ? getStatus(campaign) : "inactive";
+  const isInactivePublic = !!routeId && campaign && status === "inactive";
   const [units, setUnits] = useState(1);
   const [openCheckout, setOpenCheckout] = useState(false);
 
@@ -81,12 +102,22 @@ const CampanaCarpinteria = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!campaign) {
+  if (!campaign || isInactivePublic) {
     return (
       <div className="min-h-screen bg-warm flex flex-col">
         <SiteHeader />
-        <div className="flex-1 flex items-center justify-center text-foreground/60">
-          No hay campaña activa.
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-6 gap-3">
+          <p className="font-display text-secondary text-2xl uppercase">
+            {isInactivePublic ? "Campaña no disponible" : "No hay campaña activa"}
+          </p>
+          <p className="text-foreground/70 text-sm max-w-md">
+            {isInactivePublic
+              ? "Esta campaña no está activa públicamente."
+              : "Vuelve pronto o explora otras campañas."}
+          </p>
+          <Link to="/campanas" className="mt-2 inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-6 py-2.5 font-hand text-xs tracking-[0.22em]">
+            VER CAMPAÑAS
+          </Link>
         </div>
         <SiteFooter />
       </div>

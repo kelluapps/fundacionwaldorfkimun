@@ -307,6 +307,9 @@ function AdminCampanaEditInner() {
                 />
               </Field>
             </Block>
+          </div>
+        </div>
+      </main>
 
       <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
         <DialogContent className="bg-card border-border max-w-2xl rounded-3xl">

@@ -8,6 +8,7 @@ import CampanaCarpinteria from "./pages/CampanaCarpinteria.tsx";
 import Arbol from "./pages/Arbol.tsx";
 import Contacto from "./pages/Contacto.tsx";
 import Gracias from "./pages/Gracias.tsx";
+import GraciasSocio from "./pages/GraciasSocio.tsx";
 import AdminCampanas from "./pages/AdminCampanas.tsx";
 import AdminCampanaEdit from "./pages/AdminCampanaEdit.tsx";
 import NotFound from "./pages/NotFound.tsx";

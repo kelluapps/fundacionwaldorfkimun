@@ -9,6 +9,7 @@ import {
   setActiveCampaign,
   ICON_REGISTRY,
   slugify,
+  DEFAULT_UPSELL,
   type Campaign,
   type CampaignIconKey,
 } from "@/lib/campaigns";

@@ -9,6 +9,7 @@ import {
   setActiveCampaign,
   ICON_REGISTRY,
   slugify,
+  DEFAULT_UPSELL,
   type Campaign,
   type CampaignIconKey,
 } from "@/lib/campaigns";
@@ -250,6 +251,61 @@ function AdminCampanaEditInner() {
               <p className="text-[11px] text-foreground/50 inline-flex items-center gap-1">
                 <ImageIcon className="w-3 h-3" /> Si dejas la URL vacía, se usa la imagen por defecto.
               </p>
+            </Block>
+
+            <Block title="Upsell mensual">
+              <p className="text-xs text-foreground/60 -mt-2">
+                Después del paso 1 del modal, ofrece a la persona transformar su donación en un aporte mensual.
+              </p>
+              <Field label="Activar upsell mensual">
+                <label className="inline-flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={campaign.upsellMonthlyEnabled !== false}
+                    onChange={(e) => set("upsellMonthlyEnabled", e.target.checked)}
+                  />
+                  Mostrar paso 2 con propuesta de hacerse socio mensual
+                </label>
+              </Field>
+              <Field label="Título del upsell">
+                <Input
+                  value={campaign.upsellTitle ?? ""}
+                  onChange={(v) => set("upsellTitle", v)}
+                  placeholder={DEFAULT_UPSELL.upsellTitle}
+                />
+              </Field>
+              <Field label="Mensaje del upsell">
+                <textarea
+                  value={campaign.upsellMessage ?? ""}
+                  onChange={(e) => set("upsellMessage", e.target.value)}
+                  rows={4}
+                  placeholder={DEFAULT_UPSELL.upsellMessage}
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                />
+              </Field>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Field label="Botón principal (sí, hacerme socio)">
+                  <Input
+                    value={campaign.upsellPrimaryButtonText ?? ""}
+                    onChange={(v) => set("upsellPrimaryButtonText", v)}
+                    placeholder={DEFAULT_UPSELL.upsellPrimaryButtonText}
+                  />
+                </Field>
+                <Field label="Botón secundario (solo donación única)">
+                  <Input
+                    value={campaign.upsellSecondaryButtonText ?? ""}
+                    onChange={(v) => set("upsellSecondaryButtonText", v)}
+                    placeholder={DEFAULT_UPSELL.upsellSecondaryButtonText}
+                  />
+                </Field>
+              </div>
+              <Field label="Ruta del botón principal">
+                <Input
+                  value={campaign.upsellPrimaryAction ?? ""}
+                  onChange={(v) => set("upsellPrimaryAction", v)}
+                  placeholder={DEFAULT_UPSELL.upsellPrimaryAction}
+                />
+              </Field>
             </Block>
           </div>
         </div>

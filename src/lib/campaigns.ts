@@ -66,7 +66,24 @@ export type Campaign = {
   videoUrl?: string;
   /** ID real de la campaña en el Worker (API externa). Si está presente, se usa para fetch + donación. */
   remoteCampaignId?: string;
+  // Upsell mensual (configurable por campaña)
+  upsellMonthlyEnabled?: boolean;
+  upsellTitle?: string;
+  upsellMessage?: string;
+  upsellPrimaryButtonText?: string;
+  upsellSecondaryButtonText?: string;
+  upsellPrimaryAction?: string;
   updatedAt: string;
+};
+
+export const DEFAULT_UPSELL = {
+  upsellMonthlyEnabled: true,
+  upsellTitle: "¿Te gustaría que tu donación sea mensual?",
+  upsellMessage:
+    "Con un aporte mensual nos ayudas a sostener en el tiempo el sueño de Kimün: talleres, espacios de aprendizaje y oportunidades reales para niñas, niños, jóvenes y adultos de nuestra comunidad. Es un gesto pequeño que se convierte en raíz profunda.",
+  upsellPrimaryButtonText: "Sííí, quiero hacerme socio 🌱",
+  upsellSecondaryButtonText: "No, por ahora solo donaré a este proyecto",
+  upsellPrimaryAction: "/socios",
 };
 
 const STORAGE_KEY = "kimun.campaigns.v1";

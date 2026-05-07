@@ -55,25 +55,44 @@ export default function CampanasPublic() {
     return () => ctrl.abort();
   }, []);
 
-  const activeLocal = localCampaigns.find((c) => c.active) ?? localCampaigns[0];
-  const activeRemoteId = activeLocal?.remoteCampaignId ?? "taller-carpinteria";
+  // Mapa de configuraciones locales por remoteCampaignId
+  const localByRemote = new Map(
+    localCampaigns
+      .filter((l) => l.remoteCampaignId)
+      .map((l) => [l.remoteCampaignId as string, l]),
+  );
+  // También por id local
+  const localById = new Map(localCampaigns.map((l) => [l.id, l]));
 
-  const sorted = (items ?? []).slice().sort((a, b) => {
-    const aActive = a.isActive || a.active || a.id === activeRemoteId;
-    const bActive = b.isActive || b.active || b.id === activeRemoteId;
-    if (aActive && !bActive) return -1;
-    if (!aActive && bActive) return 1;
+  const mainLocal = localCampaigns.find((c) => getStatus(c) === "principal");
+  const mainRemoteId = mainLocal?.remoteCampaignId ?? mainLocal?.id ?? "taller-carpinteria";
+
+  // Filtrar las campañas API: ocultar las que tienen status local "inactive".
+  // Si no hay local asociada, se muestra como "active" por defecto.
+  const visible = (items ?? []).filter((c) => {
+    const local = localByRemote.get(c.id) ?? localById.get(c.id);
+    if (!local) return true;
+    return getStatus(local) !== "inactive";
+  });
+
+  const sorted = visible.slice().sort((a, b) => {
+    if (a.id === mainRemoteId) return -1;
+    if (b.id === mainRemoteId) return 1;
     return 0;
   });
 
-  const featured = sorted[0];
-  const others = sorted.slice(1);
+  const featured = sorted.find((c) => c.id === mainRemoteId) ?? sorted[0];
+  const others = sorted.filter((c) => c !== featured);
 
-  const hrefFor = (c: ApiCampaign) =>
-    c.id === activeRemoteId ? "/donar" : `/campanas/${c.id}`;
+  const hrefFor = (c: ApiCampaign) => {
+    if (c.id === mainRemoteId) return "/donar";
+    const local = localByRemote.get(c.id) ?? localById.get(c.id);
+    const slug = local?.id ?? c.id;
+    return `/campanas/${slug}`;
+  };
 
   const titleFor = (c: ApiCampaign) => {
-    const local = localCampaigns.find((l) => l.remoteCampaignId === c.id);
+    const local = localByRemote.get(c.id) ?? localById.get(c.id);
     return local?.title ?? c.title;
   };
 

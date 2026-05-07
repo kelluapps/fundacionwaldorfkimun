@@ -58,7 +58,6 @@ const DonationModal = ({ open, onOpenChange, campaign, units }: Props) => {
         campaignId: remoteId,
         name: name.trim(),
         email: email.trim(),
-        // @ts-expect-error - phone es opcional en el body del Worker
         phone: phone.trim() || undefined,
       });
       window.location.href = redirectUrl;

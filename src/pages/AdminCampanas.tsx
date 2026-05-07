@@ -11,6 +11,7 @@ import {
 } from "@/lib/campaigns";
 import { formatCLP } from "@/lib/kimun-api";
 import { CheckCircle2, Plus, Pencil, Trash2, Eye, Star } from "lucide-react";
+import ApiConnectPanel from "@/components/admin/ApiConnectPanel";
 
 const blank = (): Campaign => ({
   id: "",

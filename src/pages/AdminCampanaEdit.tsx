@@ -158,45 +158,7 @@ export default function AdminCampanaEdit() {
                 )}
               </Field>
 
-              <Field label="Token de administrador">
-                <div className="relative">
-                  <KeyRound className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" />
-                  <input
-                    type="password"
-                    value={adminToken}
-                    onChange={(e) => setAdminTokenState(e.target.value)}
-                    placeholder="Pega aquí tu ADMIN_TOKEN"
-                    className="w-full rounded-full border border-border bg-background pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-primary"
-                  />
-                </div>
-                <p className="text-[11px] text-foreground/50 mt-1">
-                  Solo se guarda en esta sesión del navegador.
-                </p>
-              </Field>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  onClick={() => handleSaveApi(false)}
-                  disabled={apiSaving || !adminToken}
-                  className="inline-flex items-center gap-1 text-xs px-4 py-2 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 disabled:opacity-50"
-                >
-                  <Cloud className="w-3.5 h-3.5" />
-                  {apiSaving ? "Guardando…" : "Guardar campaña en API"}
-                </button>
-                <button
-                  onClick={() => handleSaveApi(true)}
-                  disabled={apiSaving || !adminToken}
-                  className="inline-flex items-center gap-1 text-xs px-4 py-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-                >
-                  <Star className="w-3.5 h-3.5" /> Publicar como activa en API
-                </button>
-              </div>
-
-              {apiMsg && (
-                <p className={`text-xs ${apiMsg.kind === "ok" ? "text-primary" : "text-destructive"}`}>
-                  {apiMsg.text}
-                </p>
-              )}
+              <p className="text-[11px] text-foreground/50">Para crear o actualizar campañas en la API, ve a <Link to="/admin/api" className="underline text-primary">Admin · API</Link>.</p>
             </Block>
 
             <Block title="Datos generales">

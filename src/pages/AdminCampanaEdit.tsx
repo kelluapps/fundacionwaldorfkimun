@@ -138,12 +138,12 @@ export default function AdminCampanaEdit() {
       }
       const body = buildApiBody({ ...campaign, raised: raisedToSend, remoteCampaignId: remoteId }, publishActive || campaign.active);
       const result = await putCampaign(remoteId, body, adminToken);
-      if (result.ok) {
+      if (result.ok === true) {
         setApiMsg({ kind: "ok", text: "Campaña guardada correctamente en la API" });
-        // Sync locally too
         setCampaign((c) => (c ? { ...c, raised: raisedToSend, remoteCampaignId: remoteId } : c));
       } else {
-        setApiMsg({ kind: "err", text: result.ok ? "" : result.message });
+        const msg = (result as { ok: false; message: string }).message;
+        setApiMsg({ kind: "err", text: msg });
       }
     } finally {
       setApiSaving(false);

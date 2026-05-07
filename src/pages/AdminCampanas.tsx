@@ -63,7 +63,10 @@ export default function AdminCampanas() {
             </button>
           </div>
 
+          <ApiConnectPanel />
+
           <div className="bg-card rounded-2xl border border-border/50 shadow-card divide-y divide-border/40">
+
             {items.length === 0 && (
               <div className="p-6 text-sm text-foreground/60">No hay campañas todavía.</div>
             )}

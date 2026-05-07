@@ -6,35 +6,28 @@ import sproutImg from "@/assets/card-sprout.png";
 import branchImg from "@/assets/card-branch.png";
 import leafImg from "@/assets/card-leaf.png";
 import fruitImg from "@/assets/card-fruit.png";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import SocioModal, { type SocioPlan } from "@/components/SocioModal";
 
 type Tier = {
   key: string;
   name: string;
   description: string;
   price: string;
+  amount: number;
   cta: string;
   image: string;
   tint: string;
   buttonVariant: "ghost" | "soft" | "solid";
 };
 
-// Mismos tiers que /arbol — fuente única de verdad visual
 const tiers: Tier[] = [
-  { key: "semilla", name: "SEMILLA", description: "Todo gran sueño comienza con una semilla.", price: "$5.000", cta: "QUIERO SER PARTE", image: seedImg, tint: "bg-tier-seed", buttonVariant: "ghost" },
-  { key: "brote", name: "BROTE", description: "Damos los primeros pasos y algo comienza a crecer.", price: "$10.000", cta: "QUIERO SER PARTE", image: sproutImg, tint: "bg-tier-sprout", buttonVariant: "soft" },
-  { key: "rama", name: "RAMA", description: "Nos expandimos y fortalecemos este sueño juntos.", price: "$15.000", cta: "QUIERO SER PARTE", image: branchImg, tint: "bg-tier-branch", buttonVariant: "soft" },
-  { key: "hoja", name: "HOJA", description: "Damos vida, energía y color a este proyecto.", price: "$20.000", cta: "QUIERO SER PARTE", image: leafImg, tint: "bg-tier-leaf", buttonVariant: "soft" },
-  { key: "fruto", name: "FRUTO", description: "El fruto es el impacto que dejamos en la comunidad.", price: "$25.000+", cta: "QUIERO SER PARTE", image: fruitImg, tint: "bg-tier-fruit", buttonVariant: "solid" },
+  { key: "semilla", name: "SEMILLA", description: "Todo gran sueño comienza con una semilla.", price: "$5.000", amount: 5000, cta: "QUIERO SER SOCIO", image: seedImg, tint: "bg-tier-seed", buttonVariant: "ghost" },
+  { key: "brote", name: "BROTE", description: "Damos los primeros pasos y algo comienza a crecer.", price: "$10.000", amount: 10000, cta: "QUIERO SER SOCIO", image: sproutImg, tint: "bg-tier-sprout", buttonVariant: "soft" },
+  { key: "rama", name: "RAMA", description: "Nos expandimos y fortalecemos este sueño juntos.", price: "$15.000", amount: 15000, cta: "QUIERO SER SOCIO", image: branchImg, tint: "bg-tier-branch", buttonVariant: "soft" },
+  { key: "hoja", name: "HOJA", description: "Damos vida, energía y color a este proyecto.", price: "$20.000", amount: 20000, cta: "QUIERO SER SOCIO", image: leafImg, tint: "bg-tier-leaf", buttonVariant: "soft" },
+  { key: "fruto", name: "FRUTO", description: "El fruto es el impacto que dejamos en la comunidad.", price: "$25.000+", amount: 25000, cta: "QUIERO SER SOCIO", image: fruitImg, tint: "bg-tier-fruit", buttonVariant: "solid" },
 ];
 
 const TierButton = ({ variant, children, onClick }: { variant: Tier["buttonVariant"]; children: React.ReactNode; onClick: () => void }) => {
@@ -49,14 +42,16 @@ const TierButton = ({ variant, children, onClick }: { variant: Tier["buttonVaria
 
 const Gracias = () => {
   const [open, setOpen] = useState(false);
-  const [selectedTier, setSelectedTier] = useState<string | null>(null);
-  const handleSelect = (name?: string) => { setSelectedTier(name ?? null); setOpen(true); };
+  const [selectedPlan, setSelectedPlan] = useState<SocioPlan | null>(null);
+  const handleSelect = (t: Tier) => {
+    setSelectedPlan({ key: t.key, name: t.name, amount: t.amount });
+    setOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SiteHeader />
 
-      {/* HERO de agradecimiento */}
       <section className="px-5 sm:px-8 lg:px-12 pt-12 sm:pt-16 pb-10 text-center">
         <div className="max-w-2xl mx-auto">
           <p className="font-hand text-[11px] sm:text-xs tracking-[0.3em] text-primary mb-4">
@@ -74,7 +69,6 @@ const Gracias = () => {
         </div>
       </section>
 
-      {/* Transición emocional */}
       <section className="px-5 sm:px-8 lg:px-12 pb-10">
         <div className="max-w-2xl mx-auto bg-card/70 border border-border/50 rounded-3xl p-7 sm:p-9 text-center shadow-card">
           <p className="font-hand text-[11px] tracking-[0.28em] text-primary mb-3">
@@ -89,7 +83,6 @@ const Gracias = () => {
         </div>
       </section>
 
-      {/* Bloque de socios — mismo sistema que /arbol */}
       <section className="px-5 sm:px-8 lg:px-12 pb-10">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
@@ -111,7 +104,7 @@ const Gracias = () => {
                   {t.price} <span className="text-base text-foreground/60">/ mes</span>
                 </p>
                 <p className="text-[11px] tracking-widest text-foreground/60 mt-1 mb-5 font-hand">aporte mensual</p>
-                <TierButton variant={t.buttonVariant} onClick={() => handleSelect(t.name)}>{t.cta}</TierButton>
+                <TierButton variant={t.buttonVariant} onClick={() => handleSelect(t)}>{t.cta}</TierButton>
               </article>
             ))}
           </div>
@@ -122,7 +115,6 @@ const Gracias = () => {
         </div>
       </section>
 
-      {/* CTA principal */}
       <section className="px-5 sm:px-8 lg:px-12 pb-16">
         <div className="max-w-xl mx-auto flex flex-col items-center gap-4">
           <Link
@@ -130,7 +122,7 @@ const Gracias = () => {
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-8 py-3.5 font-hand text-sm tracking-[0.22em] shadow-card hover:bg-primary/90 hover:-translate-y-0.5 transition-all"
           >
             <Heart className="w-4 h-4" fill="currentColor" />
-            HAZTE SOCIO AHORA
+            VER TODOS LOS PLANES
           </Link>
           <Link
             to="/"
@@ -141,25 +133,7 @@ const Gracias = () => {
         </div>
       </section>
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-card border-border max-w-md rounded-3xl">
-          <DialogHeader>
-            <DialogTitle className="font-display text-3xl text-secondary text-center">
-              Estás a punto de ser parte de este árbol 🌳
-            </DialogTitle>
-            <DialogDescription className="text-center text-foreground/75 pt-3">
-              {selectedTier && <>Has elegido <span className="text-primary font-semibold">{selectedTier}</span>. </>}
-              Pronto podrás completar tu aporte mensual.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="sm:justify-center pt-2">
-            <button onClick={() => setOpen(false)} className="bg-primary text-primary-foreground rounded-full px-8 py-3 font-hand text-sm tracking-[0.22em] hover:bg-primary/90">
-              VOLVER
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
+      <SocioModal open={open} onOpenChange={setOpen} plan={selectedPlan} />
       <SiteFooter />
     </div>
   );

@@ -65,7 +65,8 @@ export async function createSocio(input: SocioInput): Promise<{ redirectUrl: str
   return data;
 }
 
-const ADMIN_TOKEN_KEY = "kimun.adminToken";
+const ADMIN_TOKEN_KEY = "kimun_admin_token";
+export const ADMIN_UNAUTHORIZED_EVENT = "kimun:admin-unauthorized";
 
 export function getAdminToken(): string {
   if (typeof window === "undefined") return "";
@@ -76,6 +77,16 @@ export function setAdminToken(token: string) {
   if (typeof window === "undefined") return;
   if (token) sessionStorage.setItem(ADMIN_TOKEN_KEY, token);
   else sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+}
+
+export function clearAdminToken() {
+  setAdminToken("");
+}
+
+function notifyUnauthorized() {
+  if (typeof window === "undefined") return;
+  sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+  window.dispatchEvent(new CustomEvent(ADMIN_UNAUTHORIZED_EVENT));
 }
 
 // =============================================================

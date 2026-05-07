@@ -141,15 +141,32 @@ export function saveCampaigns(items: Campaign[]) {
   window.dispatchEvent(new CustomEvent("kimun:campaigns-updated"));
 }
 
+/** Normaliza el status leyendo `status` o derivándolo del legacy `active`. */
+export function getStatus(c: Campaign): CampaignStatus {
+  if (c.status) return c.status;
+  return c.active ? "principal" : "inactive";
+}
+
 export function upsertCampaign(c: Campaign) {
   const items = loadCampaigns();
   const idx = items.findIndex((x) => x.id === c.id);
-  const updated = { ...c, updatedAt: new Date().toISOString() };
+  // Sincronizar legacy `active` con `status`
+  const status = c.status ?? (c.active ? "principal" : "inactive");
+  const updated: Campaign = {
+    ...c,
+    status,
+    active: status === "principal",
+    updatedAt: new Date().toISOString(),
+  };
   if (idx >= 0) items[idx] = updated;
   else items.unshift(updated);
-  if (updated.active) {
+  // Solo puede haber UNA campaña principal
+  if (status === "principal") {
     items.forEach((x) => {
-      if (x.id !== updated.id) x.active = false;
+      if (x.id !== updated.id && getStatus(x) === "principal") {
+        x.status = "active";
+        x.active = false;
+      }
     });
   }
   saveCampaigns(items);
@@ -160,14 +177,37 @@ export function deleteCampaign(id: string) {
   saveCampaigns(items);
 }
 
-export function setActiveCampaign(id: string) {
-  const items = loadCampaigns().map((x) => ({ ...x, active: x.id === id }));
+/** Define la campaña principal (causa del mes). Las otras principales pasan a "active". */
+export function setMainCampaign(id: string) {
+  const items = loadCampaigns().map((x) => {
+    if (x.id === id) return { ...x, status: "principal" as CampaignStatus, active: true };
+    if (getStatus(x) === "principal") return { ...x, status: "active" as CampaignStatus, active: false };
+    return { ...x, active: false };
+  });
   saveCampaigns(items);
 }
 
-export function getActiveCampaign(): Campaign | null {
+/** @deprecated usar setMainCampaign */
+export const setActiveCampaign = setMainCampaign;
+
+export function setCampaignStatus(id: string, status: CampaignStatus) {
+  if (status === "principal") return setMainCampaign(id);
+  const items = loadCampaigns().map((x) =>
+    x.id === id ? { ...x, status, active: false } : x,
+  );
+  saveCampaigns(items);
+}
+
+export function getMainCampaign(): Campaign | null {
   const items = loadCampaigns();
-  return items.find((x) => x.active) ?? items[0] ?? null;
+  return items.find((x) => getStatus(x) === "principal") ?? items[0] ?? null;
+}
+
+/** @deprecated usar getMainCampaign */
+export const getActiveCampaign = getMainCampaign;
+
+export function getCampaignById(id: string): Campaign | null {
+  return loadCampaigns().find((x) => x.id === id) ?? null;
 }
 
 export function slugify(s: string) {
@@ -196,7 +236,16 @@ export function useCampaigns() {
   return items;
 }
 
-export function useActiveCampaign() {
+export function useMainCampaign() {
   const items = useCampaigns();
-  return items.find((x) => x.active) ?? items[0] ?? null;
+  return items.find((x) => getStatus(x) === "principal") ?? items[0] ?? null;
+}
+
+/** @deprecated usar useMainCampaign */
+export const useActiveCampaign = useMainCampaign;
+
+export function useCampaignById(id: string | undefined) {
+  const items = useCampaigns();
+  if (!id) return null;
+  return items.find((x) => x.id === id) ?? null;
 }

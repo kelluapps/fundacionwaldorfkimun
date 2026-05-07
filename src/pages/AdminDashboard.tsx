@@ -2,13 +2,14 @@ import { Link } from "react-router-dom";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import AdminNav from "@/components/admin/AdminNav";
+import AdminGuard from "@/components/admin/AdminGuard";
 import { useCampaigns } from "@/lib/campaigns";
 import {
   fetchCampaigns,
   fetchAdminDonations,
   fetchAdminSocios,
   formatCLP,
-  getAdminToken,
+  clearAdminToken,
   MOCK_DONATIONS,
   MOCK_SOCIOS,
   type AdminDonation,
@@ -16,9 +17,9 @@ import {
   type KimunCampaign,
 } from "@/lib/kimun-api";
 import { useEffect, useMemo, useState } from "react";
-import { Cloud, Palette, Eye, ArrowRight, HandCoins, Users, UserCheck, CalendarRange } from "lucide-react";
+import { Cloud, Palette, Eye, ArrowRight, HandCoins, Users, UserCheck, CalendarRange, LogOut } from "lucide-react";
 
-export default function AdminDashboard() {
+function AdminDashboardInner() {
   const local = useCampaigns();
   const [remote, setRemote] = useState<KimunCampaign[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -26,10 +27,9 @@ export default function AdminDashboard() {
   const [socios, setSocios] = useState<AdminSocio[]>([]);
 
   useEffect(() => {
-    fetchCampaigns().then(setRemote).catch(() => setErr("No pudimos conectar con el Worker"));
-    const token = getAdminToken();
-    fetchAdminDonations(token).then((r) => setDonations(r.ok && r.items.length ? r.items : MOCK_DONATIONS));
-    fetchAdminSocios(token).then((r) => setSocios(r.ok && r.items.length ? r.items : MOCK_SOCIOS));
+    fetchCampaigns().then(setRemote).catch(() => setErr("No pudimos conectarnos con la API. Revisa tu clave."));
+    fetchAdminDonations().then((r) => setDonations(r.ok && r.items.length ? r.items : MOCK_DONATIONS));
+    fetchAdminSocios().then((r) => setSocios(r.ok && r.items.length ? r.items : MOCK_SOCIOS));
   }, []);
 
   const active = local.find((c) => c.active);
@@ -66,13 +66,28 @@ export default function AdminDashboard() {
   }, [donations, socios]);
 
 
+  const handleLogout = () => {
+    clearAdminToken();
+    window.location.href = "/admin";
+  };
+
   return (
     <div className="min-h-screen bg-warm flex flex-col">
       <SiteHeader />
       <main className="flex-1 px-4 sm:px-6 lg:px-10 py-8">
         <div className="max-w-5xl mx-auto">
-          <p className="font-hand text-[11px] tracking-[0.22em] text-secondary">ADMIN</p>
-          <h1 className="font-display text-secondary text-3xl uppercase mb-6">Panel</h1>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="font-hand text-[11px] tracking-[0.22em] text-secondary">ADMIN</p>
+              <h1 className="font-display text-secondary text-3xl uppercase mb-6">Panel</h1>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center gap-1.5 text-[11px] font-hand tracking-[0.18em] uppercase px-3 py-1.5 rounded-full border border-border hover:bg-secondary-soft text-foreground/70"
+            >
+              <LogOut className="w-3 h-3" /> Cerrar sesión
+            </button>
+          </div>
           <AdminNav />
 
           <div className="grid sm:grid-cols-3 gap-4 mb-6">
@@ -150,5 +165,13 @@ function Card({
         ABRIR <ArrowRight className="w-3 h-3" />
       </span>
     </Link>
+  );
+}
+
+export default function AdminDashboard() {
+  return (
+    <AdminGuard>
+      <AdminDashboardInner />
+    </AdminGuard>
   );
 }

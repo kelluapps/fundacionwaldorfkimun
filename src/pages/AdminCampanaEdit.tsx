@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import AdminGuard from "@/components/admin/AdminGuard";
 import {
   loadCampaigns,
   upsertCampaign,
@@ -20,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { ArrowLeft, Eye, Save, Star, Image as ImageIcon } from "lucide-react";
 
-export default function AdminCampanaEdit() {
+function AdminCampanaEditInner() {
   const { id = "" } = useParams();
   const nav = useNavigate();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
@@ -329,5 +330,13 @@ function Input({
       placeholder={placeholder}
       className="w-full rounded-full border border-border bg-background px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
     />
+  );
+}
+
+export default function AdminCampanaEdit() {
+  return (
+    <AdminGuard>
+      <AdminCampanaEditInner />
+    </AdminGuard>
   );
 }

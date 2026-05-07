@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
-import AdminTokenBar from "@/components/admin/AdminTokenBar";
-import { fetchAdminDonantes, fetchAdminDonations, formatCLP, getAdminToken, MOCK_DONATIONS, type AdminDonation } from "@/lib/kimun-api";
+import { fetchAdminDonantes, fetchAdminDonations, formatCLP, MOCK_DONATIONS, type AdminDonation } from "@/lib/kimun-api";
 import { LoadingBox, Notice } from "./AdminDonaciones";
 
 const MES_LABELS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
@@ -17,7 +16,6 @@ type DonorRow = {
 };
 
 export default function AdminDonantes() {
-  const [token, setToken] = useState(getAdminToken());
   const [items, setItems] = useState<AdminDonation[]>([]);
   const [loading, setLoading] = useState(false);
   const [note, setNote] = useState<string | null>(null);
@@ -25,14 +23,13 @@ export default function AdminDonantes() {
   const [year, setYear] = useState(new Date().getFullYear());
   const [q, setQ] = useState("");
 
-  const load = async (t: string) => {
+  const load = async () => {
     setLoading(true); setError(null); setNote(null);
-    const r = await fetchAdminDonantes(t);
+    const r = await fetchAdminDonantes();
     if (r.ok && r.items.length) {
       setItems(r.items);
     } else {
-      // fallback: derivar desde /admin/donations
-      const r2 = await fetchAdminDonations(t);
+      const r2 = await fetchAdminDonations();
       if (r2.ok) {
         setItems(r2.items);
       } else if (r2.reason === "missing" || r2.reason === "server") {
@@ -45,7 +42,7 @@ export default function AdminDonantes() {
     setLoading(false);
   };
 
-  useEffect(() => { load(token); /* eslint-disable-next-line */ }, []);
+  useEffect(() => { load(); }, []);
 
   const rows: DonorRow[] = useMemo(() => {
     const map = new Map<string, DonorRow>();
@@ -70,8 +67,6 @@ export default function AdminDonantes() {
 
   return (
     <AdminShell title="Base de datos de donantes" description="Control mensual de donaciones por donante.">
-      <AdminTokenBar onChange={setToken} />
-
       <div className="bg-card rounded-2xl border border-border/50 shadow-card p-4 mb-4 flex flex-wrap gap-2 items-center">
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar donante…" className="flex-1 min-w-[180px] text-xs rounded-full border border-border bg-background px-3 py-2 focus:outline-none focus:border-primary" />
         <label className="text-[11px] font-hand tracking-[0.18em] text-foreground/60">AÑO</label>

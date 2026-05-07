@@ -65,7 +65,8 @@ export async function createSocio(input: SocioInput): Promise<{ redirectUrl: str
   return data;
 }
 
-const ADMIN_TOKEN_KEY = "kimun.adminToken";
+const ADMIN_TOKEN_KEY = "kimun_admin_token";
+export const ADMIN_UNAUTHORIZED_EVENT = "kimun:admin-unauthorized";
 
 export function getAdminToken(): string {
   if (typeof window === "undefined") return "";
@@ -76,6 +77,16 @@ export function setAdminToken(token: string) {
   if (typeof window === "undefined") return;
   if (token) sessionStorage.setItem(ADMIN_TOKEN_KEY, token);
   else sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+}
+
+export function clearAdminToken() {
+  setAdminToken("");
+}
+
+function notifyUnauthorized() {
+  if (typeof window === "undefined") return;
+  sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+  window.dispatchEvent(new CustomEvent(ADMIN_UNAUTHORIZED_EVENT));
 }
 
 // =============================================================
@@ -115,16 +126,18 @@ export type AdminFetchResult<T> = {
   message?: string;
 };
 
-async function adminGet<T>(path: string, token: string): Promise<AdminFetchResult<T>> {
+async function adminGet<T>(path: string, tokenArg?: string): Promise<AdminFetchResult<T>> {
+  const token = tokenArg ?? getAdminToken();
   if (!token) {
-    return { ok: false, items: [], reason: "unauthorized", message: "Token de administrador incorrecto" };
+    return { ok: false, items: [], reason: "unauthorized", message: "La clave secreta no es correcta o expiró. Vuelve a ingresarla." };
   }
   try {
     const res = await fetch(`${KIMUN_API_BASE}${path}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (res.status === 401 || res.status === 403) {
-      return { ok: false, items: [], reason: "unauthorized", message: "Token de administrador incorrecto" };
+      notifyUnauthorized();
+      return { ok: false, items: [], reason: "unauthorized", message: "La clave secreta no es correcta o expiró. Vuelve a ingresarla." };
     }
     if (res.status === 404) {
       return { ok: false, items: [], reason: "missing", message: "Endpoint pendiente de conectar en Worker" };
@@ -136,14 +149,14 @@ async function adminGet<T>(path: string, token: string): Promise<AdminFetchResul
     const items = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
     return { ok: true, items: items as T[] };
   } catch {
-    return { ok: false, items: [], reason: "network", message: "No pudimos conectar con el Worker" };
+    return { ok: false, items: [], reason: "network", message: "No pudimos conectarnos con la API. Revisa tu clave." };
   }
 }
 
-export const fetchAdminDonations = (token: string) => adminGet<AdminDonation>("/admin/donations", token);
-export const fetchAdminDonantes = (token: string) => adminGet<AdminDonation>("/admin/donantes", token);
-export const fetchAdminSocios = (token: string) => adminGet<AdminSocio>("/admin/socios", token);
-export const fetchAdminSociosControl = (token: string) => adminGet<AdminSocio>("/admin/socios-control", token);
+export const fetchAdminDonations = (token?: string) => adminGet<AdminDonation>("/admin/donations", token);
+export const fetchAdminDonantes = (token?: string) => adminGet<AdminDonation>("/admin/donantes", token);
+export const fetchAdminSocios = (token?: string) => adminGet<AdminSocio>("/admin/socios", token);
+export const fetchAdminSociosControl = (token?: string) => adminGet<AdminSocio>("/admin/socios-control", token);
 
 // =============================================================
 // Mocks de respaldo cuando los endpoints aún no existen
@@ -172,10 +185,11 @@ export type SaveCampaignResult =
 export async function putCampaign(
   campaignId: string,
   body: Record<string, unknown>,
-  token: string,
+  tokenArg?: string,
 ): Promise<SaveCampaignResult> {
+  const token = tokenArg ?? getAdminToken();
   if (!token) {
-    return { ok: false, reason: "unauthorized", message: "Token de administrador incorrecto" };
+    return { ok: false, reason: "unauthorized", message: "La clave secreta no es correcta o expiró. Vuelve a ingresarla." };
   }
   try {
     const res = await fetch(`${KIMUN_API_BASE}/campaigns/${encodeURIComponent(campaignId)}`, {
@@ -187,7 +201,8 @@ export async function putCampaign(
       body: JSON.stringify(body),
     });
     if (res.status === 401 || res.status === 403) {
-      return { ok: false, reason: "unauthorized", message: "Token de administrador incorrecto" };
+      notifyUnauthorized();
+      return { ok: false, reason: "unauthorized", message: "La clave secreta no es correcta o expiró. Vuelve a ingresarla." };
     }
     if (!res.ok) {
       const text = await res.text().catch(() => "");
@@ -195,7 +210,7 @@ export async function putCampaign(
     }
     return { ok: true };
   } catch {
-    return { ok: false, reason: "network", message: "No pudimos conectar con el Worker" };
+    return { ok: false, reason: "network", message: "No pudimos conectarnos con la API. Revisa tu clave." };
   }
 }
 

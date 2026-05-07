@@ -1,13 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
-import AdminTokenBar from "@/components/admin/AdminTokenBar";
-import { fetchAdminDonations, formatCLP, getAdminToken, MOCK_DONATIONS, type AdminDonation } from "@/lib/kimun-api";
+import { fetchAdminDonations, formatCLP, MOCK_DONATIONS, type AdminDonation } from "@/lib/kimun-api";
 import { Loader2, Search } from "lucide-react";
 
 const MESES = ["Todos", "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
 export default function AdminDonaciones() {
-  const [token, setToken] = useState(getAdminToken());
   const [items, setItems] = useState<AdminDonation[]>([]);
   const [loading, setLoading] = useState(false);
   const [note, setNote] = useState<string | null>(null);
@@ -19,11 +17,11 @@ export default function AdminDonaciones() {
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [month, setMonth] = useState<number>(0);
 
-  const load = async (t: string) => {
+  const load = async () => {
     setLoading(true);
     setError(null);
     setNote(null);
-    const r = await fetchAdminDonations(t);
+    const r = await fetchAdminDonations();
     if (r.ok) {
       setItems(r.items);
     } else if (r.reason === "missing" || r.reason === "server") {
@@ -37,8 +35,7 @@ export default function AdminDonaciones() {
   };
 
   useEffect(() => {
-    load(token);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    load();
   }, []);
 
   const campaigns = useMemo(() => {
@@ -64,8 +61,6 @@ export default function AdminDonaciones() {
 
   return (
     <AdminShell title="Últimas donaciones" description="Revisa las últimas donaciones recibidas por campaña.">
-      <AdminTokenBar onChange={(t) => setToken(t)} />
-
       <div className="bg-card rounded-2xl border border-border/50 shadow-card p-4 mb-4 grid gap-2 sm:grid-cols-6">
         <div className="sm:col-span-2 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-foreground/40" />

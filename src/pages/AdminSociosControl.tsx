@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
-import AdminTokenBar from "@/components/admin/AdminTokenBar";
-import { fetchAdminSociosControl, fetchAdminSocios, formatCLP, getAdminToken, MOCK_SOCIOS, type AdminSocio } from "@/lib/kimun-api";
+import { fetchAdminSociosControl, fetchAdminSocios, formatCLP, MOCK_SOCIOS, type AdminSocio } from "@/lib/kimun-api";
 import { LoadingBox, Notice } from "./AdminDonaciones";
 
 const MES_LABELS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
@@ -9,20 +8,19 @@ const MES_LABELS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep
 type CellState = "paid" | "pending" | "canceled" | "na";
 
 export default function AdminSociosControl() {
-  const [token, setToken] = useState(getAdminToken());
   const [items, setItems] = useState<AdminSocio[]>([]);
   const [loading, setLoading] = useState(false);
   const [note, setNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [year, setYear] = useState(new Date().getFullYear());
 
-  const load = async (t: string) => {
+  const load = async () => {
     setLoading(true); setError(null); setNote(null);
-    const r = await fetchAdminSociosControl(t);
+    const r = await fetchAdminSociosControl();
     if (r.ok && r.items.length) {
       setItems(r.items);
     } else {
-      const r2 = await fetchAdminSocios(t);
+      const r2 = await fetchAdminSocios();
       if (r2.ok) setItems(r2.items);
       else if (r2.reason === "missing" || r2.reason === "server") {
         setItems(MOCK_SOCIOS);
@@ -32,7 +30,7 @@ export default function AdminSociosControl() {
     setLoading(false);
   };
 
-  useEffect(() => { load(token); /* eslint-disable-next-line */ }, []);
+  useEffect(() => { load(); }, []);
 
   const rows = useMemo(() => {
     const now = new Date();
@@ -59,8 +57,6 @@ export default function AdminSociosControl() {
 
   return (
     <AdminShell title="Control mensual de socios" description="Seguimiento anual de aportes mensuales por socio.">
-      <AdminTokenBar onChange={setToken} />
-
       <div className="bg-card rounded-2xl border border-border/50 shadow-card p-4 mb-4 flex items-center gap-3">
         <label className="text-[11px] font-hand tracking-[0.18em] text-foreground/60">AÑO</label>
         <select value={year} onChange={(e) => setYear(Number(e.target.value))} className="text-xs rounded-full border border-border bg-background px-3 py-2">

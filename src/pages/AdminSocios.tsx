@@ -6,7 +6,6 @@ import { LoadingBox, Notice } from "./AdminDonaciones";
 const MESES = ["Todos", "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
 export default function AdminSocios() {
-  const [token, setToken] = useState(getAdminToken());
   const [items, setItems] = useState<AdminSocio[]>([]);
   const [loading, setLoading] = useState(false);
   const [note, setNote] = useState<string | null>(null);
@@ -18,9 +17,9 @@ export default function AdminSocios() {
   const [year, setYear] = useState(new Date().getFullYear());
   const [month, setMonth] = useState(0);
 
-  const load = async (t: string) => {
+  const load = async () => {
     setLoading(true); setError(null); setNote(null);
-    const r = await fetchAdminSocios(t);
+    const r = await fetchAdminSocios();
     if (r.ok) {
       setItems(r.items);
     } else if (r.reason === "missing" || r.reason === "server") {
@@ -32,7 +31,7 @@ export default function AdminSocios() {
     setLoading(false);
   };
 
-  useEffect(() => { load(token); /* eslint-disable-next-line */ }, []);
+  useEffect(() => { load(); }, []);
 
   const filtered = useMemo(() => {
     return items.filter((s) => {

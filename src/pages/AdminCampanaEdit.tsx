@@ -11,14 +11,14 @@ import {
   type Campaign,
   type CampaignIconKey,
 } from "@/lib/campaigns";
-import { formatCLP, fetchCampaigns, getAdminToken, setAdminToken, putCampaign, type KimunCampaign } from "@/lib/kimun-api";
+import { formatCLP, fetchCampaigns, type KimunCampaign } from "@/lib/kimun-api";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Eye, Save, Star, Image as ImageIcon, Cloud, KeyRound } from "lucide-react";
+import { ArrowLeft, Eye, Save, Star, Image as ImageIcon } from "lucide-react";
 
 export default function AdminCampanaEdit() {
   const { id = "" } = useParams();
